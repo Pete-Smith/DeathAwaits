@@ -18,18 +18,18 @@ from .helper import iso_to_gregorian, stringify_datetime
 class LogDb(core.QObject):
     """ On-disk data store.  """
     table_def = (
-        ('id','integer PRIMARY KEY'),
-        ('activity','text'),
-        ('start','timestamp'),
-        ('end','timestamp'),
-        ('duration','real'),  # seconds
+        ('id', 'integer PRIMARY KEY'),
+        ('activity', 'text'),
+        ('start', 'timestamp'),
+        ('end', 'timestamp'),
+        ('duration', 'real'),  # seconds
     )
     entry_added = core.pyqtSignal(int)
     entry_modified = core.pyqtSignal(int)
     entry_removed = core.pyqtSignal(int)
 
     def __init__(self, filename=None, parent=None):
-        super(LogDb,self).__init__(parent)
+        super(LogDb, self).__init__(parent)
         self._undo_stack = list()
         self._redo_stack = list()
         self._current_action = None
@@ -42,7 +42,7 @@ class LogDb(core.QObject):
         self.connection.row_factory = sqlite3.Row
         self.connection.create_function("REGEXP", 2, LogDb.regexp)
         self.connection.create_function(
-            "contains_weekday",3, LogDb.contains_weekday
+            "contains_weekday", 3, LogDb.contains_weekday
         )
         if new_file:
             c = self.connection.cursor()
@@ -86,7 +86,7 @@ class LogDb(core.QObject):
         return day in range(start_day, end_day + 1)
 
     def filter(
-        self,activity=None, start=None, end=None,
+        self, activity=None, start=None, end=None,
         first=False, last=False, weekdays=None
     ):
         """
@@ -127,19 +127,19 @@ class LogDb(core.QObject):
             statement += "ORDER BY start"
         c = self.connection.cursor()
         try:
-            c.execute(statement,values)
-            if ((first and not last) or (last and not first)):
+            c.execute(statement, values)
+            if (first and not last) or (last and not first):
                 return c.fetchone()
             elif first and last:
                 first = c.fetchone()
                 last = self.filter(activity, start, end, False, True)
-                return (first, last)
+                return first, last
             else:
                 return c.fetchall()
         finally:
             c.close()
 
-    def print_(self,*args,**kwargs):
+    def print_(self, *args, **kwargs):
         """
         Print a table of rows, arguments are passed to the filter method.
         """
@@ -169,7 +169,7 @@ class LogDb(core.QObject):
             max(column_widths[i],len(headers[i]))
             for i in range(len(headers))
         ]
-        lines = []
+        lines = list()
         lines.append(
             " | ".join(
                 [" {0:<{1}s}".format(headers[i], column_widths[i])
@@ -229,14 +229,14 @@ class LogDb(core.QObject):
 
     def rename_entry(self, activity, ids, apply_capitalization=False):
         if isinstance(ids, int):
-            ids = [ids,]
+            ids = [ids, ]
         elif isinstance(ids, (list, tuple)):
-            noncompliant = [n for n in ids if not isinstance(n, int)]
-            if noncompliant:
+            non_compliant = [n for n in ids if not isinstance(n, int)]
+            if non_compliant:
                 raise TypeError(
                     'Non-integer id parameter{0}: {1}'.format(
-                        's' if len(noncompliant) > 1 else '',
-                        ', '.join(noncompliant)
+                        's' if len(non_compliant) > 1 else '',
+                        ', '.join(non_compliant)
                     )
                 )
         activity = self._check_activity(activity, apply_capitalization)
@@ -246,7 +246,7 @@ class LogDb(core.QObject):
             if entry['activity'] != activity:
                 self.record_change(entry, 'modify')
                 effected_rows.append(id)
-        statement =  "UPDATE activitylog SET activity = ? WHERE "
+        statement = "UPDATE activitylog SET activity = ? WHERE "
         statement += " OR ".join(["id = ?" for n in ids])
         c = self.connection.cursor()
         try:
@@ -286,10 +286,10 @@ class LogDb(core.QObject):
             return 0
         return duration / span
 
-    def  _merge_common(self, activity, start, end, duration):
-        rows = self.filter(activity,start,end)
+    def _merge_common(self, activity, start, end, duration):
+        rows = self.filter(activity, start, end)
         ids_to_delete = []
-        if isinstance(duration,datetime.timedelta):
+        if isinstance(duration, datetime.timedelta):
             duration = duration.total_seconds()
         new_density = self._row_density(duration, start, end)
         for row in rows:
@@ -314,7 +314,7 @@ class LogDb(core.QObject):
             if entry:
                 self.record_change(dict(entry), 'remove')
         if ids_to_delete:
-            statement =  "DELETE FROM activitylog WHERE "
+            statement = "DELETE FROM activitylog WHERE "
             statement += " OR ".join(("id = ?",) * len(ids_to_delete))
             c = self.connection.cursor()
             try:
@@ -355,7 +355,8 @@ class LogDb(core.QObject):
             activity = preexisting
         return activity
 
-    def _normalize_range(self, start=None, end=None, duration=None):
+    @staticmethod
+    def _normalize_range(start=None, end=None, duration=None):
         """
         If one of the time parameters (start, end, duration) are not given,
         this method will infer it from the other two.
@@ -918,14 +919,14 @@ class LogModel(core.QAbstractTableModel):
         assert isinstance(database, LogDb)
         self._db = database
         self._cache = []
-        self.update_cache(activity=None,start=None,end=None)
+        self.update_cache(activity=None, start=None,end=None)
         # Connections
         self._db.entry_added.connect(self._handle_addition)
         self._db.entry_modified.connect(self._handle_modification)
         self._db.entry_removed.connect(self._handle_deletion)
 
     def update_cache(self,activity=None,start=None,end=None):
-        if isinstance(activity,str) and activity.strip() == '':
+        if isinstance(activity, str) and activity.strip() == '':
             activity = None
         self.beginResetModel()
         self._cache = self._db.filter(activity, start, end)
@@ -935,7 +936,7 @@ class LogModel(core.QAbstractTableModel):
     def rowCount(self,parent=None):
         return len(self._cache)
 
-    def columnCount(self,parent=None):
+    def columnCount(self, parent=None):
         return len(LogDb.table_def)
 
     def data(self, index, role=Qt.DisplayRole):
@@ -978,13 +979,13 @@ class LogModel(core.QAbstractTableModel):
             activity, start, end, duration, id, apply_capitalization
         )
 
-    def delete_entry(self,id):
+    def delete_entry(self, id):
         self._db.remove_entry(id)
 
     def adjust_entries(self, ids, amount):
         self._db.shift_rows(ids, amount)
 
-    def _handle_deletion(self,id):
+    def _handle_deletion(self, id):
         for r in range(self.rowCount()):
             entry = self.data(self.index(r,0),Qt.UserRole)
             if entry is not None and entry['id'] == id:
@@ -993,7 +994,7 @@ class LogModel(core.QAbstractTableModel):
                 self.endRemoveRows()
                 break
 
-    def _handle_addition(self,id):
+    def _handle_addition(self, id):
         row = self._db.row(id)
         if self._fits_filter(row):
             for i, current in enumerate(self._cache):
@@ -1008,7 +1009,7 @@ class LogModel(core.QAbstractTableModel):
                 self._cache.append(row)
                 self.endInsertRows()
 
-    def _handle_modification(self,id):
+    def _handle_modification(self, id):
         row = self._db.row(id)
         if self._fits_filter(row):
             for i, current in enumerate(self._cache):
@@ -1019,7 +1020,7 @@ class LogModel(core.QAbstractTableModel):
                     self.dataChanged.emit(left_index,right_index)
                     break
 
-    def _fits_filter(self,entry):
+    def _fits_filter(self, entry):
         """ Check entry parameter against the current filter.  """
         time_ok, activity_ok = False, False
         activity, start, end = self._current_filter
@@ -1027,7 +1028,7 @@ class LogModel(core.QAbstractTableModel):
             try:
                 if (start <= entry['start'] <= end
                     or start <= entry['end'] <= end
-                    or (entry['start']  <= start and  entry['end'] >= end)
+                    or (entry['start'] <= start and  entry['end'] >= end)
                    ):
                     time_ok = True
             except TypeError:
@@ -1039,10 +1040,10 @@ class LogModel(core.QAbstractTableModel):
                     )
                 )
                 raise
-        elif (end is not None and isinstance(start,datetime.datetime)):
+        elif end is not None and isinstance(start,datetime.datetime):
             if entry['start'] <= end:
                 time_ok = True
-        elif (start is not None and isinstance(end,datetime.datetime)):
+        elif start is not None and isinstance(end,datetime.datetime):
             if entry['end'] >= start:
                 time_ok = True
         else:
@@ -1050,7 +1051,7 @@ class LogModel(core.QAbstractTableModel):
         if activity is None:
             activity_ok = True
         else:
-            reg = re.compile(activity,re.IGNORECASE)
+            reg = re.compile(activity, re.IGNORECASE)
             activity_ok = reg.search(entry['activity']) is not None
         return time_ok and activity_ok
 

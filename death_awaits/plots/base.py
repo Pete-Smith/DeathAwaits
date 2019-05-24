@@ -8,6 +8,7 @@ from death_awaits.palettes import get_application_palette
 
 class PlotDialogBase(Widgets.QWidget):
     name = "*** A VERBOSE NAME ***"
+
     def __init__(self, parent=None):
         super(PlotDialogBase,  self).__init__(parent)
         # Layout
@@ -94,27 +95,25 @@ class PlotDialogBase(Widgets.QWidget):
         """
         level = self.level.value()
         category_count = self.categories.value()
-        #if activity != 'unrecorded':
-        #    start, end = self.bracket(database, activity, start, end)
         activities = database.slice_activities(
             start=start,
             end=end,
             level=level,
-            unrecorded= getattr(self,'unrecorded',True),
+            unrecorded=getattr(self, 'unrecorded', True),
         )
         items_shown = list(activities.items())
         if activity:
-            reg = re.compile(activity,re.IGNORECASE)
+            reg = re.compile(activity, re.IGNORECASE)
             new_items = []
             other = []
             for k, v in items_shown:
                 m = reg.search(k)
                 if m:
-                    new_items.append((k,v),)
+                    new_items.append((k, v),)
                 elif self.inclusive_other.isChecked():
                     other.append(v)
             if other:
-                new_items.append(('other',sum(other)),)
+                new_items.append(('other', sum(other)),)
             items_shown = new_items
         items_shown.sort(key=lambda i: i[1], reverse=True)
         if len(items_shown) > category_count:

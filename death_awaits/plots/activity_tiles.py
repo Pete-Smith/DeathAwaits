@@ -45,7 +45,7 @@ class ActivityTilesBase(PlotDialogBase):
     @staticmethod
     def proportion_to_radius(value, full_radius=0.5):
         return (
-            math.sqrt((math.pi * full_radius **2) * value) / math.sqrt(math.pi)
+            math.sqrt((math.pi * full_radius ** 2) * value) / math.sqrt(math.pi)
         )
 
     def _plot_data(self, axes, database, activity, start, end):

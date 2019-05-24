@@ -2,7 +2,6 @@ import sys
 import unittest
 from datetime import datetime, timedelta
 
-import PyQt5.QtGui as gui
 import PyQt5.QtWidgets as widgets
 from PyQt5.QtCore import Qt
 
@@ -12,15 +11,18 @@ from death_awaits.helper import iso_to_gregorian
 
 NOW = datetime.now()
 
+
 def minutes(n):
     return timedelta(seconds=n*60)
+
 
 def hours(n):
     return minutes(n*60)
 
-columns = ('activity', 'start', 'end', 'duration')
 
-entries = (
+COLUMNS = ('activity', 'start', 'end', 'duration')
+
+ENTRIES = (
     # (activity, start, end, duration)
     ('sleep', NOW, NOW + hours(8), None),
     ('eat', NOW + hours(7), None, hours(1).seconds ),
@@ -31,7 +33,7 @@ entries = (
 class TestLogDb(unittest.TestCase):
     def setUp(self,):
         self.db = LogDb(":memory:")
-        self.test_data = [dict(zip(columns,e)) for e in entries]
+        self.test_data = [dict(zip(COLUMNS, e)) for e in ENTRIES]
 
     def test_insertion_start_end(self):
         entry = self.test_data[0]
@@ -131,7 +133,8 @@ class TestLogDb(unittest.TestCase):
             seconds=entry['duration'] * 2
         )
         end = entry['end'] - timedelta(
-            seconds=entry['duration'] * 1.5        )
+            seconds=entry['duration'] * 1.5
+        )
         contrib = self.db.slice_contrib(entry,start,end)
         self.assertAlmostEqual(0, contrib)
 
@@ -316,7 +319,6 @@ class TestLogDb(unittest.TestCase):
         self.assertEqual(len(self.db.filter()), 1)
 
 
-
 class TestFilterPanel(unittest.TestCase):
     def setUp(self):
         self.panel = FilterPanel(None)
@@ -336,10 +338,10 @@ class TestFilterPanel(unittest.TestCase):
         self.panel.year.setValue(year)
         activity, start, end = self.panel.current_filter
         self.assertEqual(
-            start, datetime(year,1,1,0,0,0)
+            start, datetime(year, 1, 1, 0, 0, 0)
         )
         self.assertEqual(
-            end, datetime(year + 1,1,1,0,0,0)
+            end, datetime(year + 1, 1, 1, 0, 0, 0)
         )
 
     def test_month(self):
@@ -350,10 +352,10 @@ class TestFilterPanel(unittest.TestCase):
         self.panel.month.setCurrentIndex(m)
         activity, start, end = self.panel.current_filter
         self.assertEqual(
-            start, datetime(year,1,1,0,0,0)
+            start, datetime(year, 1, 1, 0, 0, 0)
         )
         self.assertEqual(
-            end, datetime(year,2,1,0,0,0)
+            end, datetime(year, 2, 1, 0, 0, 0)
         )
 
     def test_week(self):
