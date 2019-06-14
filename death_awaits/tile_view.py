@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 from death_awaits.db import LogDb
 
 
-class AggregateModel(Core.QAbstractItemModel):
+class ChunkedModel(Core.QAbstractItemModel):
     """
 
     """
@@ -15,7 +15,7 @@ class AggregateModel(Core.QAbstractItemModel):
 
     def __init__(self, activity=None, start=None, end=None,
             categories=12, chunk_size=None, show_other=True, parent=None):
-        super(AggregateModel, self).__init__(parent=parent)
+        super(ChunkedModel, self).__init__(parent=parent)
         pass
 
     def rowCount(self, parent=None):

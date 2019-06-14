@@ -201,7 +201,7 @@ class LogDb(core.QObject):
             activity, start, end, duration
         )
         self._modify_overlaps(start, end, duration)
-        if isinstance(duration,datetime.timedelta):
+        if isinstance(duration, datetime.timedelta):
             duration = duration.total_seconds()
         c = self.connection.cursor()
         try:
@@ -498,7 +498,7 @@ class LogDb(core.QObject):
                 last_id = c.lastrowid
                 created_ids.append(last_id)
                 row['id'] = last_id
-                self.record_change(row,'add')
+                self.record_change(row, 'add')
         finally:
             c.close()
             self.connection.commit()
@@ -778,7 +778,7 @@ class LogDb(core.QObject):
                 style_b[i] = m.groups()[0]
             else:
                 style_b[i] = None
-        if style_b != (None,None,None):
+        if style_b != (None, None, None):
             return LogDb._seconds_from_strings(*style_b)
 
     @staticmethod
@@ -787,9 +787,8 @@ class LogDb(core.QObject):
         Return the number of seconds the row has within the given time span.
         """
         if (start <= row['start'] <= end
-            or start <= row['end'] <= end
-            or (start > row['start'] and end < row['end'])
-           ):
+                or start <= row['end'] <= end
+                or (start > row['start'] and end < row['end'])):
             slice_start = max(start, row['start'])
             slice_end = min(end, row['end'])
             proportion = (
@@ -797,7 +796,7 @@ class LogDb(core.QObject):
                 / float((row['end'] - row['start']).total_seconds())
             )
             duration = row['duration']
-            if isinstance(duration,datetime.timedelta):
+            if isinstance(duration, datetime.timedelta):
                 duration = duration.total_seconds()
             elif duration is None:
                 duration = (row['end'] - row['start']).total_seconds()
@@ -812,10 +811,10 @@ class LogDb(core.QObject):
         The action parameter may be 'add', 'modify', or 'remove'
         This will clear the redo stack, as well.
         """
-        assert action in ('add','modify','remove')
+        assert action in ('add', 'modify', 'remove')
         if self._current_action is None:
             self._current_action = {
-                'add' : [], 'modify' : [], 'remove' : [],
+                'add': [], 'modify': [], 'remove': [],
             }
         self._current_action[action].append(entry)
 
@@ -1032,9 +1031,8 @@ class LogModel(core.QAbstractTableModel):
         if None not in (start, end):
             try:
                 if (start <= entry['start'] <= end
-                    or start <= entry['end'] <= end
-                    or (entry['start'] <= start and  entry['end'] >= end)
-                   ):
+                        or start <= entry['end'] <= end
+                        or (entry['start'] <= start and entry['end'] >= end)):
                     time_ok = True
             except TypeError:
                 print(

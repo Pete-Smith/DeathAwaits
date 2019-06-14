@@ -478,7 +478,7 @@ class ListPanel(widgets.QWidget):
         else:
             row = None
             if DEBUG:
-                sys.stdout.write( "row not found" + os.linesep)
+                sys.stdout.write("row not found" + os.linesep)
         if row is not None:
             selection = core.QItemSelection()
             selection.append(
@@ -503,7 +503,7 @@ class ListPanel(widgets.QWidget):
         selected_rows = self.table.selectionModel().selectedRows()
         if len(selected_rows) == 1:
             i = selected_rows[0].row()
-            entry = self.model.data(self.model.index(i,0),role=Qt.UserRole)
+            entry = self.model.data(self.model.index(i, 0), role=Qt.UserRole)
             self.editor.set_entry(entry)
         self.update_interface()
 
@@ -545,7 +545,7 @@ class ListPanel(widgets.QWidget):
         selected_rows = self.table.selectionModel().selectedRows()
         if selected_rows:
             ids = [
-                self.model.data(self.model.index(r.row(),0))
+                self.model.data(self.model.index(r.row(), 0))
                 for r in selected_rows
             ]
             for id in ids:
@@ -598,9 +598,9 @@ class AdjustDialog(widgets.QDialog):
     def __init__(self,parent=None):
         super(AdjustDialog,self).__init__(parent)
         # Widgets
-        self.forward_box = widgets.QCheckBox("Forward",self)
+        self.forward_box = widgets.QCheckBox("Forward", self)
         self.forward_box.setChecked(True)
-        self.backward_box = widgets.QCheckBox("Backward",self)
+        self.backward_box = widgets.QCheckBox("Backward", self)
         box_group = widgets.QButtonGroup(self)
         box_group.addButton(self.forward_box)
         box_group.addButton(self.backward_box)
@@ -665,40 +665,40 @@ class EntryEditor(widgets.QGroupBox):
         self._id = None
         # Widgets
         self.activity = widgets.QLineEdit(self)
-        activity_label = widgets.QLabel("Activity:",self)
+        activity_label = widgets.QLabel("Activity:", self)
         activity_label.setBuddy(self.activity)
-        self.link = widgets.QCheckBox("Link",self)
+        self.link = widgets.QCheckBox("Link", self)
         self.duration_field = widgets.QLineEdit(self)
         self.duration_field.setFocusPolicy(Qt.StrongFocus)
-        duration_label = widgets.QLabel("Duration:",self)
+        duration_label = widgets.QLabel("Duration:", self)
         duration_label.setBuddy(self.duration_field)
-        start_box = widgets.QGroupBox('Start:',self)
+        start_box = widgets.QGroupBox('Start:', self)
         self.start_date = widgets.QDateEdit(self)
         self.start_date.setCalendarPopup(True)
         self.start = widgets.QTimeEdit(self)
-        end_box = widgets.QGroupBox('End:',self)
+        end_box = widgets.QGroupBox('End:', self)
         self.end_date = widgets.QDateEdit(self)
         self.end_date.setCalendarPopup(True)
         self.end = widgets.QTimeEdit(self)
         # Shortcuts
-        start_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+S"),self)
-        end_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+E"),self)
-        activity_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+A"),self)
-        link_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+L"),self)
-        duration_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+D"),self)
+        start_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+S"), self)
+        end_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+E"), self)
+        activity_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+A"), self)
+        link_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+L"), self)
+        duration_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+D"), self)
         # Tab Order
-        self.setTabOrder(self.activity,self.duration_field)
-        self.setTabOrder(self.duration_field,self.link)
-        self.setTabOrder(self.link,self.start)
-        self.setTabOrder(self.start,self.end)
+        self.setTabOrder(self.activity, self.duration_field)
+        self.setTabOrder(self.duration_field, self.link)
+        self.setTabOrder(self.link, self.start)
+        self.setTabOrder(self.start, self.end)
         # Layout
         main = widgets.QVBoxLayout()
         top_row = widgets.QHBoxLayout()
         top_row.addWidget(activity_label)
-        top_row.addWidget(self.activity,8)
+        top_row.addWidget(self.activity, 8)
         top_row.addStretch(1)
         top_row.addWidget(duration_label)
-        top_row.addWidget(self.duration_field,2)
+        top_row.addWidget(self.duration_field, 2)
         top_row.addStretch(1)
         top_row.addWidget(self.link)
         main.addLayout(top_row)
@@ -738,7 +738,7 @@ class EntryEditor(widgets.QGroupBox):
         self.update_completer()
 
     def update_completer(self, item=None):
-        if item is None or not hasattr(self,'_activity_list'):
+        if item is None or not hasattr(self, '_activity_list'):
             self._activity_list = core.QStringListModel(self._db.activities())
             activity_completer = widgets.QCompleter(self._activity_list, self)
             activity_completer.setCompletionMode(
@@ -761,7 +761,7 @@ class EntryEditor(widgets.QGroupBox):
         self.start_date.setDate(self.start.date())
         self.end_date.setDate(self.end.date())
 
-    def set_entry(self,entry):
+    def set_entry(self, entry):
         self._id = entry['id']
         self.activity.setText(entry['activity'])
         self.start.setDateTime(entry['start'])
