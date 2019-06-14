@@ -29,30 +29,12 @@ DEBUG = True
 LIST_EM = 50
 
 
-#VALID_STYLE = (
-#    "QLineEdit {{background-color : {0};}}".format(
-#        widgets.QApplication.palette().color(
-#            gui.QPalette.Active,
-#            gui.QPalette.Base
-#        ).name(),
-#    )
-#)
-#
-#
-#INVALID_STYLE = (
-#    "QLineEdit {{background-color : {0};}}".format(
-#        #gui.QColor("#fcd8d8").name()
-#        gui.QColor(Qt.red).name()
-#    )
-#)
-
-
 class MainWindow(widgets.QMainWindow):
-    def __init__(self,parent=None):
-        super(MainWindow,self).__init__(parent)
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
         # Actions
         self.open_preferences_action = widgets.QAction("Preferences...",self)
-        self.quit_action = widgets.QAction("Quit",self)
+        self.quit_action = widgets.QAction("Quit", self)
         self.quit_action.setShortcut(gui.QKeySequence("Ctrl+Q"))
         # Set-up
         self.backup_db()
@@ -166,9 +148,7 @@ class MainWindow(widgets.QMainWindow):
         list_menu.addAction(self.workspace.list_panel.rename_action)
         graph_menu = self.menuBar().addMenu("&Graph")
         self.graph_type_menu = graph_menu.addMenu("Graph Type")
-        self.graph_type_menu.aboutToShow.connect(
-            self._build_graph_type_menu
-        )
+        self.graph_type_menu.aboutToShow.connect(self._build_graph_type_menu)
         graph_menu.addAction(self.workspace.graph_panel.configure_action)
         graph_menu.addAction(self.workspace.graph_panel.refresh_action)
 
@@ -179,11 +159,11 @@ class MainWindow(widgets.QMainWindow):
         menu = self.graph_type_menu
         menu.clear()
         if (not hasattr(self,"workspace")
-            or not isinstance(self.workspace,Workspace)):
+                or not isinstance(self.workspace,Workspace)):
             return None
         for i, item in enumerate(self.workspace.graph_panel.plotters):
             action = menu.addAction(item.name)
-            action.triggered.connect( partial(set_graph_type,item.name))
+            action.triggered.connect(partial(set_graph_type, item.name))
 
 
 class Workspace(widgets.QWidget):
@@ -193,7 +173,7 @@ class Workspace(widgets.QWidget):
         super(Workspace,self).__init__(parent)
         self.setWindowTitle(APP_NAME)
         if filename is None:
-           filename = ":memory:"
+            filename = ":memory:"
         self._db = LogDb(filename)
         # Widgets
         self.filter_panel = FilterPanel(self)
@@ -210,7 +190,7 @@ class Workspace(widgets.QWidget):
         top_section.addWidget(self.filter_panel, 1)
         top_section.addStretch(0)
         main.addLayout(top_section)
-        main.addWidget(self.tabs,1)
+        main.addWidget(self.tabs, 1)
         self.setLayout(main)
         # Connections
         self.filter_panel.apply_filter.connect(self.apply_filter)
@@ -237,7 +217,7 @@ class Workspace(widgets.QWidget):
 
 class GraphPanel(widgets.QWidget):
     def __init__(self, database, parent=None):
-        super(GraphPanel,self).__init__(parent)
+        super(GraphPanel, self).__init__(parent)
         assert isinstance(database, LogDb)
         self._db = database
         # Misc Attributes
@@ -256,7 +236,7 @@ class GraphPanel(widgets.QWidget):
         # Widgets
         self.type_box = widgets.QComboBox(self)
         self.type_box.setEditable(False)
-        type_label = widgets.QLabel("Graph Type:",self)
+        type_label = widgets.QLabel("Graph Type:", self)
         config_stack = widgets.QStackedWidget(self)
         for item in self.plotters:
             self.type_box.addItem(item.name)
@@ -310,7 +290,7 @@ class GraphPanel(widgets.QWidget):
         self.figure.savefig(filename)
 
     @core.pyqtSlot(str, datetime.datetime, datetime.datetime, bool)
-    def update_filter(self,activity,start,end, visible):
+    def update_filter(self, activity, start, end, visible):
         self.activity = activity
         self.start = start
         self.end = end
@@ -331,8 +311,8 @@ class GraphPanel(widgets.QWidget):
         self.canvas.draw()
         self.update()
 
-    def check_config_update(self,toggled):
-        if toggled == False:
+    def check_config_update(self, toggled):
+        if not toggled:
             self.refresh_plot()
 
 
@@ -444,7 +424,7 @@ class ListPanel(widgets.QWidget):
         self.undo_action.triggered.connect(self.undo)
         self.redo_action.triggered.connect(self.redo)
         self.rename_action.triggered.connect(self.rename_selection)
-        core.QTimer.singleShot(0,self.clear_entry)
+        core.QTimer.singleShot(0, self.clear_entry)
 
     def update_interface(self):
         self.save_action.setEnabled(self.editor.is_entry_valid())
@@ -598,9 +578,9 @@ class ListPanel(widgets.QWidget):
                 self.table.scrollToBottom()
             else:
                 self.table.scrollTo(
-                    self.model.index(latest_row,0),
+                    self.model.index(latest_row, 0),
                     hint=widgets.QTableView.PositionAtCenter
-                    |widgets.QTableView.EnsureVisible,
+                    | widgets.QTableView.EnsureVisible
                 )
             if match_range:
                 self.editor.start.setDateTime(min_time)
@@ -652,8 +632,9 @@ class AdjustDialog(widgets.QDialog):
         self.duration.textChanged.connect(self._duration_edited)
         self.duration.editingFinished.connect(partial(self._duration_edited,True))
 
-    def _duration_edited(self,fix=False):
+    def _duration_edited(self, fix=False):
         pass
+        # TODO
         # seconds = LogDb.parse_duration(self.duration.text())
         # if seconds is None:
         #     self.duration.setStyleSheet(INVALID_STYLE)
@@ -760,7 +741,9 @@ class EntryEditor(widgets.QGroupBox):
         if item is None or not hasattr(self,'_activity_list'):
             self._activity_list = core.QStringListModel(self._db.activities())
             activity_completer = widgets.QCompleter(self._activity_list, self)
-            activity_completer.setCompletionMode(widgets.QCompleter.PopupCompletion)
+            activity_completer.setCompletionMode(
+                widgets.QCompleter.PopupCompletion
+            )
             self.activity.setCompleter(activity_completer)
         if item not in self._activity_list.stringList():
             l = self._activity_list.stringList()
@@ -788,7 +771,7 @@ class EntryEditor(widgets.QGroupBox):
         self.duration_field.setText(LogDb.format_duration(entry['duration']))
         self.activity.setFocus()
 
-    def reset(self,latest):
+    def reset(self, latest):
         self._id = None
         self.start.setDateTime(latest)
         if not isinstance(latest,core.QDateTime):
@@ -830,11 +813,11 @@ class EntryEditor(widgets.QGroupBox):
                 self.duration_field.text()
             )
         entry = {
-            'id' : self._id,
-            'activity' : activity,
-            'start' : start,
-            'end' : end,
-            'duration' : duration,
+            'id': self._id,
+            'activity': activity,
+            'start': start,
+            'end': end,
+            'duration': duration,
         }
         return entry
 
@@ -882,7 +865,7 @@ class FilterPanel(widgets.QGroupBox):
     responsive = True
 
     def __init__(self, parent=None):
-        super(FilterPanel,self).__init__("Filter:",parent)
+        super(FilterPanel, self).__init__("Filter:", parent)
         # Actions
         self.clear_action = widgets.QAction("Clear Activity Filter", self)
         self.clear_action.setIcon(get_icon("x.png"))
@@ -891,7 +874,7 @@ class FilterPanel(widgets.QGroupBox):
         self.type_selector = widgets.QComboBox(self)
         self.type_selector.addItems(FilterPanel.filter_types)
         self.type_selector.setEditable(False)
-        type_label = widgets.QLabel("Range:",self)
+        type_label = widgets.QLabel("Range:", self)
         type_label.setBuddy(self.type_selector)
         self.start = widgets.QDateTimeEdit(self)
         self.start.setDateTime(now - datetime.timedelta(seconds=60 * 60))
@@ -913,37 +896,37 @@ class FilterPanel(widgets.QGroupBox):
         self.week.setValue(now.isocalendar()[1])
         self.week_label = widgets.QLabel('Week:')
         self.activity = widgets.QLineEdit(self)
-        activity_label = widgets.QLabel("Activity:",self)
+        activity_label = widgets.QLabel("Activity:", self)
         blank_widget = widgets.QWidget(self)
         clear_btn = widgets.QToolButton(self)
         clear_btn.setDefaultAction(self.clear_action)
         # Layout
         main = widgets.QHBoxLayout()
         main.addWidget(type_label)
-        main.addWidget(self.type_selector,2)
+        main.addWidget(self.type_selector, 2)
         ymw_widget = widgets.QWidget(self)
         ymw_layout = widgets.QHBoxLayout()
         ymw_layout.addWidget(self.year_label)
-        ymw_layout.addWidget(self.year,2)
+        ymw_layout.addWidget(self.year, 2)
         ymw_layout.addWidget(self.month_label)
-        ymw_layout.addWidget(self.month,2)
+        ymw_layout.addWidget(self.month, 2)
         ymw_layout.addWidget(self.week_label)
-        ymw_layout.addWidget(self.week,2)
-        ymw_layout.setContentsMargins(0,0,0,0)
+        ymw_layout.addWidget(self.week, 2)
+        ymw_layout.setContentsMargins(0, 0, 0, 0)
         ymw_widget.setLayout(ymw_layout)
         range_widget = widgets.QWidget(self)
         range_layout = widgets.QHBoxLayout()
-        range_layout.addWidget(self.start,2)
-        range_layout.addWidget(self.end,2)
-        range_layout.setContentsMargins(0,0,0,0)
+        range_layout.addWidget(self.start, 2)
+        range_layout.addWidget(self.end, 2)
+        range_layout.setContentsMargins(0, 0, 0, 0)
         range_widget.setLayout(range_layout)
         self.stack = widgets.QStackedLayout()
         self.stack.addWidget(ymw_widget)
         self.stack.addWidget(range_widget)
         self.stack.addWidget(blank_widget)
-        main.addLayout(self.stack,2)
+        main.addLayout(self.stack, 2)
         main.addWidget(activity_label)
-        main.addWidget(self.activity,2)
+        main.addWidget(self.activity, 2)
         main.addWidget(clear_btn)
         self.setLayout(main)
         self.setMaximumWidth(em_dist(LIST_EM))
@@ -1008,7 +991,7 @@ class FilterPanel(widgets.QGroupBox):
     def current_filter(self):
         activity_text = self.activity.text().strip()
         range_ = self.current_range
-        return (activity_text, range_[0], range_[1])
+        return activity_text, range_[0], range_[1]
 
     @property
     def current_range(self):
@@ -1035,7 +1018,7 @@ class FilterPanel(widgets.QGroupBox):
                 base.year, base.month, base.day, 0, 0, 0
             )
             end = start + datetime.timedelta(days=7)
-            base = core.QDate(year,1,1)
+            base = core.QDate(year, 1, 1)
             return start, end
         elif self.type_selector.currentIndex() == 3:
             return (
@@ -1051,7 +1034,7 @@ class FilterPanel(widgets.QGroupBox):
 
 class PreferencesDialog(widgets.QDialog):
     def __init__(self, parent=None):
-        super(PreferencesDialog,self).__init__(parent)
+        super(PreferencesDialog, self).__init__(parent)
         self.setWindowTitle("Preferences")
         # Widgets
         bbox = widgets.QDialogButtonBox(
@@ -1088,9 +1071,9 @@ class RenameDialog(widgets.QDialog):
         activity_completer = widgets.QCompleter(self._activity_list, self)
         activity_completer.setCompletionMode(widgets.QCompleter.PopupCompletion)
         self.activity.setCompleter(activity_completer)
-        activity_label = widgets.QLabel('Activity:',self)
+        activity_label = widgets.QLabel('Activity:', self)
         activity_label.setBuddy(self.activity)
-        self.apply_cap = widgets.QCheckBox('Apply capitalization?',self)
+        self.apply_cap = widgets.QCheckBox('Apply capitalization?', self)
         self.apply_cap.setChecked(False)
         # Layout
         main = widgets.QVBoxLayout(self)
@@ -1105,7 +1088,7 @@ class RenameDialog(widgets.QDialog):
         bbox.accepted.connect(self.accept)
         bbox.rejected.connect(self.reject)
         core.QTimer.singleShot(
-            0.0, partial(self.activity.setFocus, Qt.OtherFocusReason)
+            0, partial(self.activity.setFocus, Qt.OtherFocusReason)
         )
 
 
@@ -1122,7 +1105,7 @@ def run(interactive=False):
     if app is None:
         app = widgets.QApplication(sys.argv)
     if platform.system() == 'Windows' and platform.release() == '7':
-        app_id = '.'.join([ORG_NAME,APP_NAME])
+        app_id = '.'.join([ORG_NAME, APP_NAME])
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
     app.setWindowIcon(get_application_icon())
     app.setApplicationName(APP_NAME)
@@ -1151,7 +1134,7 @@ def get_database():
     app_dir = gui.QDesktopServices.storageLocation(
         gui.QDesktopServices.DataLocation
     )
-    filename = os.path.join(app_dir,"user_data.sqlite")
+    filename = os.path.join(app_dir, "user_data.sqlite")
     return LogDb(filename)
 
 

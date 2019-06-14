@@ -5,7 +5,6 @@ import re
 from collections import OrderedDict
 import copy
 
-
 import dateutil
 import PyQt5.QtGui as gui
 import PyQt5.QtWidgets as widgets
@@ -50,8 +49,8 @@ class LogDb(core.QObject):
                 c.execute(
                     "CREATE TABLE activitylog (" + (
                         ", ".join(
-                            ["{0} {1}".format(k,t)
-                             for k,t in LogDb.table_def
+                            ["{0} {1}".format(k, t)
+                             for k, t in LogDb.table_def
                             ]
                         )
                     ) + ")"
@@ -69,12 +68,12 @@ class LogDb(core.QObject):
         """
         if item is None:
             item = ''
-        reg = re.compile(expr,re.IGNORECASE)
+        reg = re.compile(expr, re.IGNORECASE)
         result = reg.search(item)
         return result is not None
 
     @staticmethod
-    def contains_weekday(start,end,day):
+    def contains_weekday(start, end, day):
         """
         SQLite registered function takes two ISO datetimes and a weekday
         integer.
@@ -102,7 +101,7 @@ class LogDb(core.QObject):
                 "((start BETWEEN ? AND ? OR end BETWEEN ? AND ?) "
                 "OR (start <= ? AND end >= ?))"
             )
-            values.extend([start, end,] * 3)
+            values.extend([start, end] * 3)
         elif end is None and isinstance(start, datetime.datetime):
             clauses.append("? <= end")
             values.append(start)
@@ -143,7 +142,7 @@ class LogDb(core.QObject):
         """
         Print a table of rows, arguments are passed to the filter method.
         """
-        rows = self.filter(*args,**kwargs)
+        rows = self.filter(*args, **kwargs)
         if len(rows) == 0:
             print("{0}({1}) is empty.".format(
                 self.__class__.__name__, repr(self._filename)
@@ -190,12 +189,12 @@ class LogDb(core.QObject):
             print(line)
 
     def create_entry(
-        self, activity, start=None, end=None, duration=None, id=None,
+        self, activity, start=None, end=None, duration=None, id_=None,
         apply_capitalization=False,
     ):
         """ Return the id of the inserted entry.  """
-        if id is not None:
-            self.remove_entry(id)
+        if id_ is not None:
+            self.remove_entry(id_)
         activity = self._check_activity(activity, apply_capitalization)
         start, end, duration = self._normalize_range(start, end, duration)
         activity, start, end, duration = self._merge_common(
@@ -212,13 +211,13 @@ class LogDb(core.QObject):
             )
             values = (activity, start, end, duration)
             c.execute(statement, values)
-            row_id =  c.lastrowid
+            row_id = c.lastrowid
             new_entry = {
-                'id' : row_id,
-                'activity' : activity,
-                'start' : start,
-                'end' : end,
-                'duration' : duration,
+                'id': row_id,
+                'activity': activity,
+                'start': start,
+                'end': end,
+                'duration': duration,
             }
             self.record_change(new_entry, 'add')
             return row_id
@@ -241,33 +240,33 @@ class LogDb(core.QObject):
                 )
         activity = self._check_activity(activity, apply_capitalization)
         effected_rows = list()
-        for id in ids:
-            entry = dict(self.row(id))
+        for id_ in ids:
+            entry = dict(self.row(id_))
             if entry['activity'] != activity:
                 self.record_change(entry, 'modify')
-                effected_rows.append(id)
+                effected_rows.append(id_)
         statement = "UPDATE activitylog SET activity = ? WHERE "
         statement += " OR ".join(["id = ?" for n in ids])
         c = self.connection.cursor()
         try:
-            values = [activity,]
+            values = [activity, ]
             values.extend(ids)
             c.execute(statement, values)
         finally:
             c.close()
             self.connection.commit()
-        for id in effected_rows:
-            self.entry_modified.emit(id)
+        for id_ in effected_rows:
+            self.entry_modified.emit(id_)
 
     def shift_rows(self, ids, amount):
         if isinstance(amount, (float, int)):
             amount = datetime.timedelta(seconds=amount)
         assert isinstance(amount, datetime.timedelta)
         data = list()
-        for id in ids:
-            assert isinstance(id, int)
-            data.append(dict(self.row(id)))
-            self.remove_entry(id)
+        for id_ in ids:
+            assert isinstance(id_, int)
+            data.append(dict(self.row(id_)))
+            self.remove_entry(id_)
         for i in range(len(data)):
             data[i]['start'] += amount
             data[i]['end'] += amount
@@ -309,8 +308,8 @@ class LogDb(core.QObject):
                 else:
                     duration = duration + row['duration']
                 ids_to_delete.append(row['id'])
-        for id in ids_to_delete:
-            entry = self.row(id)
+        for id_ in ids_to_delete:
+            entry = self.row(id_)
             if entry:
                 self.record_change(dict(entry), 'remove')
         if ids_to_delete:
@@ -322,8 +321,8 @@ class LogDb(core.QObject):
             finally:
                 c.close()
                 self.connection.commit()
-        for id in ids_to_delete:
-            self.entry_removed.emit(id)
+        for id_ in ids_to_delete:
+            self.entry_removed.emit(id_)
         return activity, start, end, duration
 
     def _check_activity(self, activity, apply_capitalization=False):
@@ -349,8 +348,8 @@ class LogDb(core.QObject):
             finally:
                 c.close()
                 self.connection.commit()
-            for id in ids:
-                self.entry_modified.emit(id)
+            for id_ in ids:
+                self.entry_modified.emit(id_)
         elif preexisting:
             activity = preexisting
         return activity
@@ -392,11 +391,11 @@ class LogDb(core.QObject):
                     (LogDb.table_def[i][0],val) for i, val in enumerate(row)
                 ])
             )
-        times = set((start,end))
+        times = {(start, end)}
         for row in overlaps:
-            if start < row['start'] and end > row['start']:
+            if start < row['start'] < end:
                 times.add(row['start'])
-            if start < row['end'] and end > row['end']:
+            if start < row['end'] < end:
                 times.add(row['end'])
         times = sorted(times)
         previous = None
@@ -429,7 +428,8 @@ class LogDb(core.QObject):
                         if (entry_a['start'] < previous
                             and entry_a['end'] > time
                            ):
-                            # Entry spans beyond previous & time, split it in two.
+                            # Entry spans beyond previous & time,
+                            # Split it in two.
                             entry_b = copy.deepcopy(entry_a)
                             entry_b['id'] = None
                             del entry_b['_touched']
@@ -502,12 +502,12 @@ class LogDb(core.QObject):
         finally:
             c.close()
             self.connection.commit()
-        for id in modified_ids:
-            self.entry_modified.emit(id)
-        for id in removed_ids:
-            self.entry_removed.emit(id)
-        for id in created_ids:
-            self.entry_added.emit(id)
+        for id_ in modified_ids:
+            self.entry_modified.emit(id_)
+        for id_ in removed_ids:
+            self.entry_removed.emit(id_)
+        for id_ in created_ids:
+            self.entry_added.emit(id_)
 
     def print_daily_totals(self, date, level=None):
         assert isinstance(date, datetime.date)
@@ -552,7 +552,7 @@ class LogDb(core.QObject):
                     output[piece] = proportion
         if unrecorded:
             amount = 1.0 - sum(output.values())
-            output.update({'unrecorded':amount})
+            output.update({'unrecorded': amount})
         return output
 
     def span_slices(
@@ -570,8 +570,11 @@ class LogDb(core.QObject):
             span = span.total_seconds()
         if span % chunk_size:
             chunk_size = span / round(span / float(chunk_size))
-        if not isinstance(start,datetime.datetime) and isinstance(start,datetime.date):
-            start = datetime.datetime(start.year, start.month, start.day, 0, 0, 0)
+        if (not isinstance(start, datetime.datetime)
+                and isinstance(start, datetime.date)):
+            start = datetime.datetime(
+                start.year, start.month, start.day, 0, 0, 0
+            )
         chunks_in_span = int(span / chunk_size)
         chunk_midpoints = []
         activity_series = {}
@@ -636,8 +639,8 @@ class LogDb(core.QObject):
             step = datetime.timedelta(days=1)
         for increment in range(increment_count):
             if (not weekly and
-                weekdays is not None
-                and current.weekday() not in weekdays):
+                    weekdays is not None
+                    and current.weekday() not in weekdays):
                 current = current + datetime.timedelta(days=1)
                 continue
             current_midpoints, current_activities = self.span_slices(
@@ -671,26 +674,25 @@ class LogDb(core.QObject):
                 activity_series[k][i] = activity_series[k][i] / lateral_sum
         if not unrecorded and 'unrecorded' in activity_series:
             del activity_series['unrecorded']
-        #import pdb; pdb.set_trace()
         return midpoints, activity_series
 
-    def remove_entry(self,id):
-        removed_entry = self.row(id)
+    def remove_entry(self, id_):
+        removed_entry = self.row(id_)
         if removed_entry:
             self.record_change(dict(removed_entry), 'remove')
         c = self.connection.cursor()
         try:
-            c.execute("DELETE FROM activitylog WHERE id=?", [id,])
+            c.execute("DELETE FROM activitylog WHERE id=?", [id_, ])
         finally:
             c.close()
             self.connection.commit()
-        self.entry_removed.emit(id)
+        self.entry_removed.emit(id_)
 
-    def row(self,id):
+    def row(self, id_):
         """ Singleton row look-up by id.  """
         c = self.connection.cursor()
         try:
-            c.execute("SELECT * FROM activitylog WHERE id=?", [id,])
+            c.execute("SELECT * FROM activitylog WHERE id=?", [id_, ])
             return c.fetchone()
         finally:
             c.close()
@@ -725,6 +727,17 @@ class LogDb(core.QObject):
         return output_string
 
     @staticmethod
+    def _seconds_from_strings(days, hours, minutes):
+        seconds = 0
+        if days:
+            seconds += float(days) * 24 * 3600
+        if hours:
+            seconds += float(hours) * 3600
+        if minutes:
+            seconds += float(minutes) * 60
+        return seconds
+
+    @staticmethod
     def parse_duration(raw):
         """
         Return the number of seconds a duration string represents,
@@ -732,15 +745,7 @@ class LogDb(core.QObject):
         """
         if raw is None or not raw.strip():
             return None
-        def _seconds_from_strings(days,hours,minutes):
-            seconds = 0
-            if days:
-                seconds += float(days) * 24 * 3600
-            if hours:
-                seconds += float(hours) * 3600
-            if minutes:
-                seconds += float(minutes) * 60
-            return seconds
+
         try:
             hours = float(raw.strip())
             return hours * 3600
@@ -765,8 +770,8 @@ class LogDb(core.QObject):
             days = match.group('days')
             hours = match.group('hours')
             minutes = match.group('minutes')
-            return _seconds_from_strings(days,hours,minutes)
-        style_b = [style_b_days, style_b_hours, style_b_minutes ]
+            return LogDb._seconds_from_strings(days, hours, minutes)
+        style_b = [style_b_days, style_b_hours, style_b_minutes]
         for i, finder in enumerate(style_b):
             m = finder.search(raw)
             if m and m.groups()[0]:
@@ -774,10 +779,10 @@ class LogDb(core.QObject):
             else:
                 style_b[i] = None
         if style_b != (None,None,None):
-            return _seconds_from_strings(*style_b)
+            return LogDb._seconds_from_strings(*style_b)
 
     @staticmethod
-    def slice_contrib(row,start,end):
+    def slice_contrib(row, start, end):
         """
         Return the number of seconds the row has within the given time span.
         """
@@ -803,7 +808,7 @@ class LogDb(core.QObject):
     def record_change(self, entry, action='add'):
         """
         Record the old version of a modified or deleted entry.
-        Or the added verson of a created entry.
+        Or the added version of a created entry.
         The action parameter may be 'add', 'modify', or 'remove'
         This will clear the redo stack, as well.
         """
@@ -838,7 +843,7 @@ class LogDb(core.QObject):
             if entry['id'] is not None
         ]
         if ids_to_delete:
-            statement =  "DELETE FROM activitylog WHERE "
+            statement = "DELETE FROM activitylog WHERE "
             statement += " OR ".join(("id = ?",) * len(ids_to_delete))
             c = self.connection.cursor()
             try:
@@ -925,12 +930,12 @@ class LogModel(core.QAbstractTableModel):
         self._db.entry_modified.connect(self._handle_modification)
         self._db.entry_removed.connect(self._handle_deletion)
 
-    def update_cache(self,activity=None,start=None,end=None):
+    def update_cache(self, activity=None,start=None,end=None):
         if isinstance(activity, str) and activity.strip() == '':
             activity = None
         self.beginResetModel()
         self._cache = self._db.filter(activity, start, end)
-        self._current_filter = (activity,start,end)
+        self._current_filter = (activity, start, end)
         self.endResetModel()
 
     def rowCount(self,parent=None):
@@ -966,7 +971,7 @@ class LogModel(core.QAbstractTableModel):
                     )
                 )
 
-    def headerData(self,section,orientation,role=Qt.DisplayRole):
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return LogDb.table_def[section][0].title()
 
@@ -994,8 +999,8 @@ class LogModel(core.QAbstractTableModel):
                 self.endRemoveRows()
                 break
 
-    def _handle_addition(self, id):
-        row = self._db.row(id)
+    def _handle_addition(self, id_):
+        row = self._db.row(id_)
         if self._fits_filter(row):
             for i, current in enumerate(self._cache):
                 if current['start'] > row['start']:
@@ -1009,15 +1014,15 @@ class LogModel(core.QAbstractTableModel):
                 self._cache.append(row)
                 self.endInsertRows()
 
-    def _handle_modification(self, id):
-        row = self._db.row(id)
+    def _handle_modification(self, id_):
+        row = self._db.row(id_)
         if self._fits_filter(row):
             for i, current in enumerate(self._cache):
                 if current['id'] == row['id']:
                     self._cache[i] = row
-                    left_index = self.index(i,0)
-                    right_index = self.index(i,self.columnCount()-1)
-                    self.dataChanged.emit(left_index,right_index)
+                    left_index = self.index(i, 0)
+                    right_index = self.index(i, self.columnCount()-1)
+                    self.dataChanged.emit(left_index, right_index)
                     break
 
     def _fits_filter(self, entry):

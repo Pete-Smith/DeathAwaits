@@ -7,16 +7,15 @@ from death_awaits.db import LogDb
 
 
 class AggregateModel(Core.QAbstractItemModel):
+    """
+
+    """
     hourly = 0
     daily = 1
 
-    def __init__(self, parent=None):
+    def __init__(self, activity=None, start=None, end=None,
+            categories=12, chunk_size=None, show_other=True, parent=None):
         super(AggregateModel, self).__init__(parent=parent)
-
-    def update_cache(
-            self, activity=None, start=None, end=None,
-            categories=12, chunk_size=hourly, show_other=True
-    ):
         pass
 
     def rowCount(self, parent=None):

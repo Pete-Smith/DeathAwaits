@@ -8,7 +8,7 @@ setup_args = {
     'packages': find_packages(),
     'author': 'P.F. Smith',
     'author_email': 'pete at anagogical dot net',
-    'install_requires': ['pyqt5', 'matplotlib',],
+    'install_requires': ['pyqt5', 'matplotlib', 'dateutil'],
     'entry_points': {
         'gui_scripts': [
             'death_awaits = death_awaits.main:run'

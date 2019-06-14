@@ -66,7 +66,7 @@ class BasePalette:
                 if roll < count:
                     break
             self.available_colors.remove((color, weight))
-            if not name in self._past_assignments:
+            if name not in self._past_assignments:
                 self._past_assignments[name] = []
             self._past_assignments[name].append(color)
         if color is None:
@@ -77,7 +77,7 @@ class BasePalette:
 class TangoPalette(BasePalette):
     def __init__(self):
         app = widgets.QApplication.instance() or widgets.QApplication(sys.argv)
-        bg_value =  app.palette().color(gui.QPalette.Base).valueF()
+        bg_value = app.palette().color(gui.QPalette.Base).valueF()
         if bg_value < 33:
             dark = 20.0
             medium = 5.0
@@ -120,8 +120,8 @@ class TangoPalette(BasePalette):
             # '#2e3436', # Aluminium6
         ]
         self.presets = {
-            'unrecorded' : '#888a85',
-            'other' : '#555753',
+            'unrecorded': '#888a85',
+            'other': '#555753',
         }
         super(TangoPalette, self).__init__()
 
