@@ -426,8 +426,7 @@ class LogDb(core.QObject):
                         # We need a trim not a shave
                         entry_a = overlaps[i]
                         if (entry_a['start'] < previous
-                            and entry_a['end'] > time
-                           ):
+                            and entry_a['end'] > time):
                             # Entry spans beyond previous & time,
                             # Split it in two.
                             entry_b = copy.deepcopy(entry_a)
@@ -833,9 +832,9 @@ class LogDb(core.QObject):
         This bypasses the normalization & checks of the create_entry method.
         """
         inverse_entry = {
-            'add' : change_entry['remove'],
-            'remove' : change_entry['add'],
-            'modify' : [],
+            'add': change_entry['remove'],
+            'remove': change_entry['add'],
+            'modify': [],
         }
         ids_to_delete = [
             entry['id'] for entry in change_entry['add']
@@ -983,16 +982,16 @@ class LogModel(core.QAbstractTableModel):
             activity, start, end, duration, id, apply_capitalization
         )
 
-    def delete_entry(self, id):
-        self._db.remove_entry(id)
+    def delete_entry(self, id_):
+        self._db.remove_entry(id_)
 
     def adjust_entries(self, ids, amount):
         self._db.shift_rows(ids, amount)
 
-    def _handle_deletion(self, id):
+    def _handle_deletion(self, id_):
         for r in range(self.rowCount()):
-            entry = self.data(self.index(r,0),Qt.UserRole)
-            if entry is not None and entry['id'] == id:
+            entry = self.data(self.index(r, 0), Qt.UserRole)
+            if entry is not None and entry['id'] == id_:
                 self.beginRemoveRows(core.QModelIndex(), r, r)
                 del self._cache[r]
                 self.endRemoveRows()
@@ -1004,7 +1003,7 @@ class LogModel(core.QAbstractTableModel):
             for i, current in enumerate(self._cache):
                 if current['start'] > row['start']:
                     self.beginInsertRows(core.QModelIndex(), i, i)
-                    self._cache.insert(i,row)
+                    self._cache.insert(i, row)
                     self.endInsertRows()
                     break
             else:
