@@ -79,13 +79,13 @@ class ActivityStack(PlotDialogBase):
                     return i
             else:
                 return len(values)
-        return sorted(data,key=find_first_item,reverse=reverse)
+        return sorted(data, key=find_first_item, reverse=reverse)
 
     @staticmethod
     def _sort_largest(data,reverse=False):
         def values_sum(values):
             return sum(values[1])
-        return sorted(data,key=values_sum,reverse=reverse)
+        return sorted(data, key=values_sum, reverse=reverse)
 
     def _sample_edited(self):
         new = LogDb.parse_duration(self.sample_field.text())

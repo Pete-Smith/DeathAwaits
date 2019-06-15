@@ -223,7 +223,7 @@ class ActivityTilesDaily(ActivityTilesBase):
     @staticmethod
     def create_week_format_func(start):
         def week_format_func(value, pos):
-            current =  int(start + value)
+            current = int(start + value)
             while current > 52:
                 current -= 52
             return current

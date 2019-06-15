@@ -360,7 +360,7 @@ class LogDb(core.QObject):
         If one of the time parameters (start, end, duration) are not given,
         this method will infer it from the other two.
         """
-        if isinstance(duration,datetime.timedelta):
+        if isinstance(duration, datetime.timedelta):
             duration = duration.total_seconds()
         if None not in (start, end):
             assert start < end
@@ -385,10 +385,10 @@ class LogDb(core.QObject):
         """
         overlaps = list()
         new_rows = list()
-        for row in self.filter(start=start,end=end):
+        for row in self.filter(start=start, end=end):
             overlaps.append(
                 dict([
-                    (LogDb.table_def[i][0],val) for i, val in enumerate(row)
+                    (LogDb.table_def[i][0], val) for i, val in enumerate(row)
                 ])
             )
         times = {(start, end)}
@@ -409,7 +409,7 @@ class LogDb(core.QObject):
                 for row in overlaps
             ]
             candidate_contrib = self.slice_contrib(
-                {'start':start, 'end':end, 'duration':duration},
+                {'start': start, 'end': end, 'duration': duration},
                 previous, time
             )
             contrib_sum = sum(contrib)
@@ -537,7 +537,7 @@ class LogDb(core.QObject):
         span = (end-start).total_seconds()
         output = OrderedDict()
         for row in overlap:
-            contrib = self.slice_contrib(row,start,end)
+            contrib = self.slice_contrib(row, start, end)
             if contrib and span:
                 proportion = contrib / span
                 split_activity = [n.strip() for n in row['activity'].split(":")]
