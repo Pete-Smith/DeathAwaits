@@ -3,10 +3,9 @@ import datetime
 from enum import Enum
 import re
 
-import PyQt5.QtWidgets as Widgets
-import PyQt5.QtGui as Gui
 import PyQt5.QtCore as Core
 from PyQt5.QtCore import Qt
+from dateutil.relativedelta import relativedelta, MO, SU
 
 from death_awaits.db import LogDb
 from death_awaits.palettes import BasePalette
@@ -14,11 +13,22 @@ from death_awaits.palettes import BasePalette
 chunk = namedtuple('Chunk', ('name', 'proportion'))
 
 
+class Weekday(Enum):
+    monday = 0
+    tuesday = 1
+    wednesday = 2
+    thursday = 3
+    friday = 4
+    saturday = 5
+    sunday = 6
+
+
 class SegmentSize(Enum):
     minute = 0
     hour = 1
     day = 2
     week = 3
+    month = 4
 
 
 class SortStrategy(Enum):
@@ -53,7 +63,9 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
                  sort_strategy: SortStrategy,
                  sort_other: OtherSort, sort_unrecorded: UnrecordedSort,
                  palette: BasePalette,
-                 parent=None):
+                 first_day_of_week: Weekday,
+                 parent=None,
+                 ):
         super(LinearQuantizedModel, self).__init__(parent=parent)
         self.database = database
         self.activity = activity
@@ -65,14 +77,53 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
         self.palette = palette
         self.sort_other = sort_other
         self.sort_unrecorded = sort_unrecorded
+        if first_day_of_week not in (Weekday.sunday, Weekday.monday):
+            raise ValueError("First day of week must be Sunday or Monday.")
+        self.first_day_of_week = first_day_of_week
         self._cache = list()
         self._ranked_activities = list()
 
-    def align_boundaries(self):
-        """
-        Align the start and end attributes to clean segment boundaries.
-        """
-        pass
+    def snap_to_segment(self, value: datetime.datetime):
+        """ Return a datetime value that is on the nearest segment boundary. """
+        if self.segment_size >= SegmentSize.minute:
+            if value.second > 30:
+                value = value + datetime.timedelta(seconds=60-value.second)
+            else:
+                value = value - datetime.timedelta(seconds=value.second)
+        if self.segment_size >= SegmentSize.hour:
+            if value.minute > 30:
+                value = value + datetime.timedelta(minutes=60-value.minute)
+            else:
+                value = value - datetime.timedelta(minutes=value.minute)
+        if self.segment_size >= SegmentSize.day:
+            if value.hour > 12:
+                value = value + datetime.timedelta(hours=24-value.hour)
+            else:
+                value = value - datetime.timedelta(hours=value.hour)
+        seconds_to_previous, seconds_to_next = 0, 0
+        if self.segment_size == SegmentSize.week:
+            if self.first_day_of_week == value.weekday():
+                return value
+            if self.first_day_of_week == Weekday.monday:
+                previous_boundary = value + relativedelta(MO(-1))
+                next_boundary = value + relativedelta(MO(1))
+            elif self.first_day_of_week == Weekday.sunday:
+                previous_boundary = value + relativedelta(SU(-1))
+                next_boundary = value + relativedelta(SU(1))
+        if self.segment_size == SegmentSize.month:
+            previous_boundary = value - datetime.timedelta(days=value.day)
+            next_boundary = previous_boundary + relativedelta(months=+1)
+        if self.segment_size <= SegmentSize.week:
+            seconds_to_previous = abs(
+                (value - previous_boundary).total_seconds()
+            )
+            seconds_to_next = abs((next_boundary - value).total_seconds())
+            if seconds_to_previous <= seconds_to_next:
+                value = value - datetime.timedelta(seconds_to_previous)
+            else:
+                value = value + datetime.timedelta(seconds_to_next)
+        # TODO : Write some tests around this.
+        return value
 
     def update_ranked_activities(self):
         category_count = len(self.palette)
@@ -116,8 +167,8 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
         elif self.sort_unrecorded == UnrecordedSort.after_other:
             pass
         if ranked_activities != self._ranked_activities:
-            self._ranked_activities = ranked_activites
-            pass
+            self._ranked_activities = ranked_activities
+            #TODO: Provide a signal here.
 
     def update_segments(self, start, end):
         pass

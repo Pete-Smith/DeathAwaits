@@ -111,10 +111,10 @@ class ActivityTilesBase(PlotDialogBase):
         self, chunk_activities, allowed_activities, activity
     ):
         activities = [
-            (k, v) for k,v in chunk_activities.items()
+            (k, v) for k, v in chunk_activities.items()
             if k in allowed_activities
         ]
-        reg = re.compile(activity,re.IGNORECASE)
+        reg = re.compile(activity, re.IGNORECASE)
         other_proportion = sum(
             v for k,v in chunk_activities.items()
             if k not in allowed_activities and (
