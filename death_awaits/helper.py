@@ -2,12 +2,51 @@
 import sys
 import datetime
 import pdb
+from enum import Enum
 
 from pkg_resources import resource_filename
 import PyQt5.QtGui as gui
 import PyQt5.QtWidgets as widgets
 import PyQt5.QtCore as core
 import matplotlib as mpl
+from dateutil.relativedelta import relativedelta, MO, SU
+
+
+class Weekday(Enum):
+    monday = 0
+    tuesday = 1
+    wednesday = 2
+    thursday = 3
+    friday = 4
+    saturday = 5
+    sunday = 6
+
+
+class SegmentSize(Enum):
+    minute = 0
+    hour = 1
+    day = 2
+    week = 3
+    month = 4
+
+
+class SortStrategy(Enum):
+    largest_first = 0
+    smallest_first = 1
+    largest_first_by_segment = 2
+    smallest_first_by_segment = 3
+
+
+class OtherSort(Enum):
+    hide_other = 0
+    sort_as_activity = 1
+    after_activities = 2
+
+
+class UnrecordedSort(Enum):
+    hide_unrecorded = 0
+    sort_as_activity = 1
+    after_activities = 2
 
 
 def iso_year_start(iso_year):
@@ -98,3 +137,47 @@ def run_pdb():
         pdb.set_trace()
     finally:
         core.pyqtRestoreInputHook()
+
+
+def snap_to_segment(value: datetime.datetime, segment_size: SegmentSize, first_day_of_week: Weekday):
+    """ Return a datetime value that is on the nearest segment boundary. """
+    if segment_size >= SegmentSize.minute:
+        if value.second > 30:
+            value = value + datetime.timedelta(seconds=60-value.second)
+        else:
+            value = value - datetime.timedelta(seconds=value.second)
+    if segment_size >= SegmentSize.hour:
+        if value.minute > 30:
+            value = value + datetime.timedelta(minutes=60-value.minute)
+        else:
+            value = value - datetime.timedelta(minutes=value.minute)
+    if segment_size >= SegmentSize.day:
+        if value.hour > 12:
+            value = value + datetime.timedelta(hours=24-value.hour)
+        else:
+            value = value - datetime.timedelta(hours=value.hour)
+    if segment_size <= SegmentSize.week:
+        seconds_to_previous, seconds_to_next = 0, 0
+        if segment_size == SegmentSize.month:
+            previous_boundary = value - datetime.timedelta(days=value.day)
+            next_boundary = previous_boundary + relativedelta(months=+1)
+        else:
+            if first_day_of_week == value.weekday():
+                return value
+            if first_day_of_week == Weekday.monday:
+                previous_boundary = value + relativedelta(MO(-1))
+                next_boundary = value + relativedelta(MO(1))
+            elif first_day_of_week == Weekday.sunday:
+                previous_boundary = value + relativedelta(SU(-1))
+                next_boundary = value + relativedelta(SU(1))
+            else:
+                raise ValueError('First day of week must be Monday or Sunday.')
+        seconds_to_previous = abs(
+            (value - previous_boundary).total_seconds()
+        )
+        seconds_to_next = abs((next_boundary - value).total_seconds())
+        if seconds_to_previous <= seconds_to_next:
+            value = value - datetime.timedelta(seconds_to_previous)
+        else:
+            value = value + datetime.timedelta(seconds_to_next)
+    return value

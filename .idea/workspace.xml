@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="23bec404-a994-4763-a91f-6a591a782d16" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/death_awaits/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/death_awaits/plots/activity_stack.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/plots/activity_stack.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/death_awaits/plots/activity_tiles.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/plots/activity_tiles.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/death_awaits/helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/death_awaits/tile_view.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/tile_view.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -15,14 +13,26 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.4978313">
+    <splitter split-orientation="horizontal" split-proportion="0.53790814">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/death_awaits/tile_view.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="252">
+                  <caret line="16" column="4" selection-start-line="16" selection-start-column="4" selection-end-line="16" selection-end-column="4" />
+                  <folding>
+                    <element signature="e#0#34#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/death_awaits/plots/base.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="459">
-                  <caret line="99" column="19" selection-start-line="99" selection-start-column="19" selection-end-line="99" selection-end-column="19" />
+                <state relative-caret-position="830">
+                  <caret line="72" column="35" selection-start-line="72" selection-start-column="35" selection-end-line="72" selection-end-column="35" />
                   <folding>
                     <element signature="e#0#15#0" expanded="true" />
                   </folding>
@@ -33,8 +43,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/death_awaits/plots/activity_tiles.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1178">
-                  <caret line="91" selection-start-line="91" selection-end-line="91" />
+                <state relative-caret-position="576">
+                  <caret line="44" column="16" selection-start-line="44" selection-start-column="16" selection-end-line="44" selection-end-column="16" />
                   <folding>
                     <element signature="e#0#9#0" expanded="true" />
                   </folding>
@@ -45,19 +55,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/death_awaits/main.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="11552">
-                  <caret line="629" column="23" selection-start-line="629" selection-start-column="23" selection-end-line="629" selection-end-column="23" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/death_awaits/run.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state>
-                  <folding>
-                    <element signature="e#0#10#0" expanded="true" />
-                  </folding>
+                <state relative-caret-position="20178">
+                  <caret line="1142" selection-start-line="1142" selection-end-line="1142" />
                 </state>
               </provider>
             </entry>
@@ -65,8 +64,20 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/death_awaits/tests.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="95">
+                <state relative-caret-position="90">
                   <caret line="5" column="5" selection-start-line="5" selection-start-column="5" selection-end-line="5" selection-end-column="5" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/setup.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="216">
+                  <caret line="14" column="8" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="8" />
+                  <folding>
+                    <element signature="e#0#15#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -74,8 +85,11 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/death_awaits/palettes.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state>
-                  <caret column="10" selection-start-column="10" selection-end-column="10" />
+                <state relative-caret-position="396">
+                  <caret line="26" column="38" selection-start-line="26" selection-start-column="38" selection-end-line="26" selection-end-column="38" />
+                  <folding>
+                    <element signature="e#0#11#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -83,186 +97,21 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/death_awaits/db.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="798">
-                  <caret line="112" column="34" selection-start-line="112" selection-start-column="34" selection-end-line="112" selection-end-column="34" />
+                <state relative-caret-position="-4968">
+                  <caret line="347" column="15" selection-start-line="347" selection-start-column="15" selection-end-line="347" selection-end-column="15" />
                   <folding>
-                    <element signature="e#378#530#0" />
-                    <element signature="e#731#1958#0" />
-                    <element signature="e#1349#1958#0" />
-                    <element signature="e#1411#1870#0" />
-                    <element signature="e#1538#1648#0" />
-                    <element signature="e#1908#1958#0" />
-                    <element signature="e#2014#2279#0" />
-                    <element signature="e#2014#2118#1" />
-                    <element signature="e#2350#2680#0" />
-                    <element signature="e#2350#2514#1" />
-                    <element signature="e#4663#6262#0" />
-                    <element signature="e#4663#4752#1" />
-                    <element signature="e#4836#4971#0" />
-                    <element signature="e#5077#5449#0" />
-                    <element signature="e#5134#5418#0" />
-                    <element signature="e#5474#5569#0" />
-                    <element signature="e#5594#5696#0" />
-                    <element signature="e#5782#5896#0" />
-                    <element signature="e#6000#6211#0" />
-                    <element signature="e#6062#6179#0" />
-                    <element signature="e#6408#7666#0" />
-                    <element signature="e#6993#7543#0" />
-                    <element signature="e#7023#7120#0" />
-                    <element signature="e#7287#7468#0" />
-                    <element signature="e#7573#7666#0" />
-                    <element signature="e#7747#8929#0" />
-                    <element signature="e#7855#8191#0" />
-                    <element signature="e#7960#8191#0" />
-                    <element signature="e#8331#8498#0" />
-                    <element signature="e#8421#8498#0" />
-                    <element signature="e#8684#8777#0" />
-                    <element signature="e#8807#8853#0" />
-                    <element signature="e#8978#9507#0" />
-                    <element signature="e#9183#9290#0" />
-                    <element signature="e#9338#9401#0" />
-                    <element signature="e#9579#9898#0" />
-                    <element signature="e#9969#11543#0" />
-                    <element signature="e#10237#10922#0" />
-                    <element signature="e#10562#10922#0" />
-                    <element signature="e#10969#11070#0" />
-                    <element signature="e#11109#11422#0" />
-                    <element signature="e#11372#11422#0" />
-                    <element signature="e#11622#12735#0" />
-                    <element signature="e#11762#11855#0" />
-                    <element signature="e#11815#11855#0" />
-                    <element signature="e#11929#12650#0" />
-                    <element signature="e#12071#12203#0" />
-                    <element signature="e#12123#12203#0" />
-                    <element signature="e#12278#12488#0" />
-                    <element signature="e#12526#12576#0" />
-                    <element signature="e#12826#13712#0" />
-                    <element signature="e#12826#12971#1" />
-                    <element signature="e#13121#13286#0" />
-                    <element signature="e#13525#13676#0" />
-                    <element signature="e#13559#13662#0" />
-                    <element signature="e#13776#19314#0" />
-                    <element signature="e#13776#13931#1" />
-                    <element signature="e#14049#14198#0" />
-                    <element signature="e#14087#14183#0" />
-                    <element signature="e#14271#14420#0" />
-                    <element signature="e#14514#17135#0" />
-                    <element signature="e#14551#14591#0" />
-                    <element signature="e#14674#14781#0" />
-                    <element signature="e#15103#17107#0" />
-                    <element signature="e#15214#17107#0" />
-                    <element signature="e#15531#17107#0" />
-                    <element signature="e#15746#16871#0" />
-                    <element signature="e#15746#15783#0" />
-                    <element signature="e#17274#19019#0" />
-                    <element signature="e#17325#18482#0" />
-                    <element signature="e#17367#18482#0" />
-                    <element signature="e#17416#17783#0" />
-                    <element signature="e#17834#18482#0" />
-                    <element signature="e#18046#18178#0" />
-                    <element signature="e#18268#18348#0" />
-                    <element signature="e#18532#19019#0" />
-                    <element signature="e#18566#18667#0" />
-                    <element signature="e#19049#19095#0" />
-                    <element signature="e#19376#19765#0" />
-                    <element signature="e#19660#19765#0" />
-                    <element signature="e#21315#22818#0" />
-                    <element signature="e#21315#21469#1" />
-                    <element signature="e#21878#21978#0" />
-                    <element signature="e#22137#22770#0" />
-                    <element signature="e#22630#22770#0" />
-                    <element signature="e#23029#26272#0" />
-                    <element signature="e#23029#23300#1" />
-                    <element signature="e#23557#23878#0" />
-                    <element signature="e#23905#24055#0" />
-                    <element signature="e#24145#24308#0" />
-                    <element signature="e#24335#24453#0" />
-                    <element signature="e#24515#25508#0" />
-                    <element signature="e#24651#24722#0" />
-                    <element signature="e#24924#25060#0" />
-                    <element signature="e#24936#25060#0" />
-                    <element signature="e#25125#25471#0" />
-                    <element signature="e#25174#25336#0" />
-                    <element signature="e#25255#25336#0" />
-                    <element signature="e#25616#25784#0" />
-                    <element signature="e#25889#26121#0" />
-                    <element signature="e#26315#26664#0" />
-                    <element signature="e#26581#26627#0" />
-                    <element signature="e#26698#26927#0" />
-                    <element signature="e#26798#26888#0" />
-                    <element signature="e#26963#27196#0" />
-                    <element signature="e#27017#27106#0" />
-                    <element signature="e#27258#27363#1" />
-                    <element signature="e#27687#27753#0" />
-                    <element signature="e#27904#28126#0" />
-                    <element signature="e#28183#29630#0" />
-                    <element signature="e#28183#28314#1" />
-                    <element signature="e#28408#28466#0" />
-                    <element signature="e#28553#28645#0" />
-                    <element signature="e#29074#29255#0" />
-                    <element signature="e#29378#29531#0" />
-                    <element signature="e#29698#30536#0" />
-                    <element signature="e#29698#29790#1" />
-                    <element signature="e#29955#30501#0" />
-                    <element signature="e#30596#31088#0" />
-                    <element signature="e#30596#30837#1" />
-                    <element signature="e#30944#31037#0" />
-                    <element signature="e#30967#31037#0" />
-                    <element signature="e#31126#31337#0" />
-                    <element signature="e#31126#31247#1" />
-                    <element signature="e#31395#33617#0" />
-                    <element signature="e#31395#31598#1" />
-                    <element signature="e#31623#31746#0" />
-                    <element signature="e#31771#31878#0" />
-                    <element signature="e#31917#32189#0" />
-                    <element signature="e#32320#32803#0" />
-                    <element signature="e#32350#32454#0" />
-                    <element signature="e#32490#32602#0" />
-                    <element signature="e#32743#32803#0" />
-                    <element signature="e#32861#33555#0" />
-                    <element signature="e#32895#33020#0" />
-                    <element signature="e#33095#33454#0" />
-                    <element signature="e#33129#33245#0" />
-                    <element signature="e#33311#33391#0" />
-                    <element signature="e#33492#33555#0" />
-                    <element signature="e#33647#33973#0" />
-                    <element signature="e#34003#34312#0" />
-                    <element signature="e#34351#34380#0" />
-                    <element signature="e#34419#34448#0" />
-                    <element signature="e#34497#39947#0" />
-                    <element signature="e#34616#35022#0" />
-                    <element signature="e#35095#35353#0" />
-                    <element signature="e#35399#35422#0" />
-                    <element signature="e#35472#35499#0" />
-                    <element signature="e#35557#36521#0" />
-                    <element signature="e#35709#35972#0" />
-                    <element signature="e#36103#36521#0" />
-                    <element signature="e#36139#36317#0" />
-                    <element signature="e#36352#36521#0" />
-                    <element signature="e#36600#36714#0" />
-                    <element signature="e#36848#37012#0" />
-                    <element signature="e#37055#37081#0" />
-                    <element signature="e#37134#37166#0" />
-                    <element signature="e#37213#37520#0" />
-                    <element signature="e#37258#37520#0" />
-                    <element signature="e#37380#37520#0" />
-                    <element signature="e#37567#38107#0" />
-                    <element signature="e#37638#38107#0" />
-                    <element signature="e#37696#37912#0" />
-                    <element signature="e#37752#37912#0" />
-                    <element signature="e#37947#38107#0" />
-                    <element signature="e#38158#38571#0" />
-                    <element signature="e#38229#38571#0" />
-                    <element signature="e#38287#38571#0" />
-                    <element signature="e#38338#38571#0" />
-                    <element signature="e#38616#39947#0" />
-                    <element signature="e#38820#39393#0" />
-                    <element signature="e#38841#39045#0" />
-                    <element signature="e#39092#39393#0" />
-                    <element signature="e#39119#39209#0" />
-                    <element signature="e#39476#39532#0" />
-                    <element signature="e#39615#39671#0" />
-                    <element signature="e#39799#39908#0" />
+                    <element signature="e#0#9#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/death_awaits/helper.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state>
+                  <folding>
+                    <element signature="e#25#35#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -286,8 +135,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/death_awaits/tile_view.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="684">
-                  <caret line="72" column="13" selection-start-line="72" selection-start-column="13" selection-end-line="72" selection-end-column="13" />
+                <state>
+                  <caret line="24" column="65" selection-start-line="24" selection-start-column="65" selection-end-line="24" selection-end-column="65" />
                   <folding>
                     <element signature="e#0#34#0" expanded="true" />
                   </folding>
@@ -307,6 +156,7 @@
     </findStrings>
   </component>
   <component name="Git.Settings">
+    <option name="UPDATE_TYPE" value="REBASE" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
@@ -322,36 +172,21 @@
         <option value="$PROJECT_DIR$/death_awaits/plots/activity_tiles.py" />
         <option value="$PROJECT_DIR$/death_awaits/db.py" />
         <option value="$PROJECT_DIR$/death_awaits/tile_view.py" />
+        <option value="$PROJECT_DIR$/death_awaits/helper.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="870" />
-    <option name="y" value="300" />
-    <option name="width" value="2100" />
-    <option name="height" value="1500" />
+    <option name="x" value="67" />
+    <option name="y" value="27" />
+    <option name="width" value="1853" />
+    <option name="height" value="1053" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope">
-        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
-          <expand>
-            <path>
-              <item name="Death Awaits-2018-12-04" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="F:\src\Death Awaits-2018-12-04" type="442cc68d:ScopeViewTreeModel$RootNode" />
-            </path>
-            <path>
-              <item name="Death Awaits-2018-12-04" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="F:\src\Death Awaits-2018-12-04" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="death_awaits" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -364,23 +199,18 @@
               <item name="DeathAwaits" type="462c0819:PsiDirectoryNode" />
               <item name="death_awaits" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="DeathAwaits" type="b2602c69:ProjectViewProjectNode" />
-              <item name="DeathAwaits" type="462c0819:PsiDirectoryNode" />
-              <item name="death_awaits" type="462c0819:PsiDirectoryNode" />
-              <item name="plots" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="full.screen.before.presentation.mode" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Color Scheme Font" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -430,11 +260,11 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="2575" height="1415" extended-state="6" />
+    <frame x="67" y="27" width="1853" height="1053" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="1" sideWeight="0.5272586" visible="true" weight="0.14491019" />
+      <window_info content_ui="combo" id="Project" order="1" sideWeight="0.5272586" weight="0.14831212" />
       <window_info anchor="bottom" id="Terminal" order="0" />
       <window_info anchor="bottom" id="Event Log" order="1" side_tool="true" />
       <window_info anchor="bottom" id="Python Console" order="2" />
@@ -449,7 +279,7 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.24990067" />
-      <window_info anchor="right" id="Structure" order="3" sideWeight="0.47274143" visible="true" weight="0.13293414" />
+      <window_info anchor="right" id="Structure" order="3" sideWeight="0.47274143" weight="0.12174875" />
     </layout>
     <layout-to-restore>
       <window_info id="Favorites" order="0" side_tool="true" />
@@ -487,16 +317,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/setup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="10" column="56" selection-start-line="10" selection-start-column="56" selection-end-line="10" selection-end-column="56" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/death_awaits/widgets.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -507,13 +327,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/death_awaits/scrap.py" />
-    <entry file="file://$PROJECT_DIR$/death_awaits/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="11552">
-          <caret line="629" column="23" selection-start-line="629" selection-start-column="23" selection-end-line="629" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/death_awaits/run.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -523,10 +336,47 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/plots/activity_tiles.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="576">
+          <caret line="44" column="16" selection-start-line="44" selection-start-column="16" selection-end-line="44" selection-end-column="16" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="20178">
+          <caret line="1142" selection-start-line="1142" selection-end-line="1142" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/death_awaits/tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
+        <state relative-caret-position="90">
           <caret line="5" column="5" selection-start-line="5" selection-start-column="5" selection-end-line="5" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="14" column="8" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/palettes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="26" column="38" selection-start-line="26" selection-start-column="38" selection-end-line="26" selection-end-column="38" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -539,225 +389,41 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/palettes.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="10" selection-start-column="10" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/db.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="798">
-          <caret line="112" column="34" selection-start-line="112" selection-start-column="34" selection-end-line="112" selection-end-column="34" />
-          <folding>
-            <element signature="e#378#530#0" />
-            <element signature="e#731#1958#0" />
-            <element signature="e#1349#1958#0" />
-            <element signature="e#1411#1870#0" />
-            <element signature="e#1538#1648#0" />
-            <element signature="e#1908#1958#0" />
-            <element signature="e#2014#2279#0" />
-            <element signature="e#2014#2118#1" />
-            <element signature="e#2350#2680#0" />
-            <element signature="e#2350#2514#1" />
-            <element signature="e#4663#6262#0" />
-            <element signature="e#4663#4752#1" />
-            <element signature="e#4836#4971#0" />
-            <element signature="e#5077#5449#0" />
-            <element signature="e#5134#5418#0" />
-            <element signature="e#5474#5569#0" />
-            <element signature="e#5594#5696#0" />
-            <element signature="e#5782#5896#0" />
-            <element signature="e#6000#6211#0" />
-            <element signature="e#6062#6179#0" />
-            <element signature="e#6408#7666#0" />
-            <element signature="e#6993#7543#0" />
-            <element signature="e#7023#7120#0" />
-            <element signature="e#7287#7468#0" />
-            <element signature="e#7573#7666#0" />
-            <element signature="e#7747#8929#0" />
-            <element signature="e#7855#8191#0" />
-            <element signature="e#7960#8191#0" />
-            <element signature="e#8331#8498#0" />
-            <element signature="e#8421#8498#0" />
-            <element signature="e#8684#8777#0" />
-            <element signature="e#8807#8853#0" />
-            <element signature="e#8978#9507#0" />
-            <element signature="e#9183#9290#0" />
-            <element signature="e#9338#9401#0" />
-            <element signature="e#9579#9898#0" />
-            <element signature="e#9969#11543#0" />
-            <element signature="e#10237#10922#0" />
-            <element signature="e#10562#10922#0" />
-            <element signature="e#10969#11070#0" />
-            <element signature="e#11109#11422#0" />
-            <element signature="e#11372#11422#0" />
-            <element signature="e#11622#12735#0" />
-            <element signature="e#11762#11855#0" />
-            <element signature="e#11815#11855#0" />
-            <element signature="e#11929#12650#0" />
-            <element signature="e#12071#12203#0" />
-            <element signature="e#12123#12203#0" />
-            <element signature="e#12278#12488#0" />
-            <element signature="e#12526#12576#0" />
-            <element signature="e#12826#13712#0" />
-            <element signature="e#12826#12971#1" />
-            <element signature="e#13121#13286#0" />
-            <element signature="e#13525#13676#0" />
-            <element signature="e#13559#13662#0" />
-            <element signature="e#13776#19314#0" />
-            <element signature="e#13776#13931#1" />
-            <element signature="e#14049#14198#0" />
-            <element signature="e#14087#14183#0" />
-            <element signature="e#14271#14420#0" />
-            <element signature="e#14514#17135#0" />
-            <element signature="e#14551#14591#0" />
-            <element signature="e#14674#14781#0" />
-            <element signature="e#15103#17107#0" />
-            <element signature="e#15214#17107#0" />
-            <element signature="e#15531#17107#0" />
-            <element signature="e#15746#16871#0" />
-            <element signature="e#15746#15783#0" />
-            <element signature="e#17274#19019#0" />
-            <element signature="e#17325#18482#0" />
-            <element signature="e#17367#18482#0" />
-            <element signature="e#17416#17783#0" />
-            <element signature="e#17834#18482#0" />
-            <element signature="e#18046#18178#0" />
-            <element signature="e#18268#18348#0" />
-            <element signature="e#18532#19019#0" />
-            <element signature="e#18566#18667#0" />
-            <element signature="e#19049#19095#0" />
-            <element signature="e#19376#19765#0" />
-            <element signature="e#19660#19765#0" />
-            <element signature="e#21315#22818#0" />
-            <element signature="e#21315#21469#1" />
-            <element signature="e#21878#21978#0" />
-            <element signature="e#22137#22770#0" />
-            <element signature="e#22630#22770#0" />
-            <element signature="e#23029#26272#0" />
-            <element signature="e#23029#23300#1" />
-            <element signature="e#23557#23878#0" />
-            <element signature="e#23905#24055#0" />
-            <element signature="e#24145#24308#0" />
-            <element signature="e#24335#24453#0" />
-            <element signature="e#24515#25508#0" />
-            <element signature="e#24651#24722#0" />
-            <element signature="e#24924#25060#0" />
-            <element signature="e#24936#25060#0" />
-            <element signature="e#25125#25471#0" />
-            <element signature="e#25174#25336#0" />
-            <element signature="e#25255#25336#0" />
-            <element signature="e#25616#25784#0" />
-            <element signature="e#25889#26121#0" />
-            <element signature="e#26315#26664#0" />
-            <element signature="e#26581#26627#0" />
-            <element signature="e#26698#26927#0" />
-            <element signature="e#26798#26888#0" />
-            <element signature="e#26963#27196#0" />
-            <element signature="e#27017#27106#0" />
-            <element signature="e#27258#27363#1" />
-            <element signature="e#27687#27753#0" />
-            <element signature="e#27904#28126#0" />
-            <element signature="e#28183#29630#0" />
-            <element signature="e#28183#28314#1" />
-            <element signature="e#28408#28466#0" />
-            <element signature="e#28553#28645#0" />
-            <element signature="e#29074#29255#0" />
-            <element signature="e#29378#29531#0" />
-            <element signature="e#29698#30536#0" />
-            <element signature="e#29698#29790#1" />
-            <element signature="e#29955#30501#0" />
-            <element signature="e#30596#31088#0" />
-            <element signature="e#30596#30837#1" />
-            <element signature="e#30944#31037#0" />
-            <element signature="e#30967#31037#0" />
-            <element signature="e#31126#31337#0" />
-            <element signature="e#31126#31247#1" />
-            <element signature="e#31395#33617#0" />
-            <element signature="e#31395#31598#1" />
-            <element signature="e#31623#31746#0" />
-            <element signature="e#31771#31878#0" />
-            <element signature="e#31917#32189#0" />
-            <element signature="e#32320#32803#0" />
-            <element signature="e#32350#32454#0" />
-            <element signature="e#32490#32602#0" />
-            <element signature="e#32743#32803#0" />
-            <element signature="e#32861#33555#0" />
-            <element signature="e#32895#33020#0" />
-            <element signature="e#33095#33454#0" />
-            <element signature="e#33129#33245#0" />
-            <element signature="e#33311#33391#0" />
-            <element signature="e#33492#33555#0" />
-            <element signature="e#33647#33973#0" />
-            <element signature="e#34003#34312#0" />
-            <element signature="e#34351#34380#0" />
-            <element signature="e#34419#34448#0" />
-            <element signature="e#34497#39947#0" />
-            <element signature="e#34616#35022#0" />
-            <element signature="e#35095#35353#0" />
-            <element signature="e#35399#35422#0" />
-            <element signature="e#35472#35499#0" />
-            <element signature="e#35557#36521#0" />
-            <element signature="e#35709#35972#0" />
-            <element signature="e#36103#36521#0" />
-            <element signature="e#36139#36317#0" />
-            <element signature="e#36352#36521#0" />
-            <element signature="e#36600#36714#0" />
-            <element signature="e#36848#37012#0" />
-            <element signature="e#37055#37081#0" />
-            <element signature="e#37134#37166#0" />
-            <element signature="e#37213#37520#0" />
-            <element signature="e#37258#37520#0" />
-            <element signature="e#37380#37520#0" />
-            <element signature="e#37567#38107#0" />
-            <element signature="e#37638#38107#0" />
-            <element signature="e#37696#37912#0" />
-            <element signature="e#37752#37912#0" />
-            <element signature="e#37947#38107#0" />
-            <element signature="e#38158#38571#0" />
-            <element signature="e#38229#38571#0" />
-            <element signature="e#38287#38571#0" />
-            <element signature="e#38338#38571#0" />
-            <element signature="e#38616#39947#0" />
-            <element signature="e#38820#39393#0" />
-            <element signature="e#38841#39045#0" />
-            <element signature="e#39092#39393#0" />
-            <element signature="e#39119#39209#0" />
-            <element signature="e#39476#39532#0" />
-            <element signature="e#39615#39671#0" />
-            <element signature="e#39799#39908#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/plots/activity_tiles.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1178">
-          <caret line="91" selection-start-line="91" selection-end-line="91" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/death_awaits/plots/base.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="99" column="19" selection-start-line="99" selection-start-column="19" selection-end-line="99" selection-end-column="19" />
+        <state relative-caret-position="830">
+          <caret line="72" column="35" selection-start-line="72" selection-start-column="35" selection-end-line="72" selection-end-column="35" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/db.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-4968">
+          <caret line="347" column="15" selection-start-line="347" selection-start-column="15" selection-end-line="347" selection-end-column="15" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/death_awaits/tile_view.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="684">
-          <caret line="72" column="13" selection-start-line="72" selection-start-column="13" selection-end-line="72" selection-end-column="13" />
+        <state relative-caret-position="252">
+          <caret line="16" column="4" selection-start-line="16" selection-start-column="4" selection-end-line="16" selection-end-column="4" />
           <folding>
             <element signature="e#0#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/helper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#25#35#0" expanded="true" />
           </folding>
         </state>
       </provider>
