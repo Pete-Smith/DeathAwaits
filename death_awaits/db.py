@@ -189,12 +189,12 @@ class LogDb(core.QObject):
             print(line)
 
     def create_entry(
-        self, activity, start=None, end=None, duration=None, id_=None,
+        self, activity, start=None, end=None, duration=None, id=None,
         apply_capitalization=False,
     ):
         """ Return the id of the inserted entry.  """
-        if id_ is not None:
-            self.remove_entry(id_)
+        if id is not None:
+            self.remove_entry(id)
         activity = self._check_activity(activity, apply_capitalization)
         start, end, duration = self._normalize_range(start, end, duration)
         activity, start, end, duration = self._merge_common(
@@ -338,11 +338,11 @@ class LogDb(core.QObject):
             for row in self.filter(activity=pattern):
                 if row['activity'] != activity:
                     ids.append(row['id'])
-                    self.record_change(dict(row),'modify')
+                    self.record_change(dict(row), 'modify')
             c = self.connection.cursor()
             try:
                 statement = "UPDATE activitylog SET activity = ? WHERE "
-                statement += "OR ".join(['id=?',]*len(ids))
+                statement += "OR ".join(['id=?', ]*len(ids))
                 variables = [activity,] + ids
                 c.execute(statement, variables)
             finally:
@@ -426,7 +426,7 @@ class LogDb(core.QObject):
                         # We need a trim not a shave
                         entry_a = overlaps[i]
                         if (entry_a['start'] < previous
-                            and entry_a['end'] > time):
+                                and entry_a['end'] > time):
                             # Entry spans beyond previous & time,
                             # Split it in two.
                             entry_b = copy.deepcopy(entry_a)
@@ -464,16 +464,16 @@ class LogDb(core.QObject):
                     if row['duration'] == 0:
                         orig_entry = self.row(row['id'])
                         if orig_entry:
-                            self.record_change(dict(orig_entry),'remove')
+                            self.record_change(dict(orig_entry), 'remove')
                         c.execute(
                             "DELETE FROM activitylog WHERE id=?",
-                            [row['id'],]
+                            [row['id'], ]
                         )
                         removed_ids.append(row['id'])
                     else:
                         orig_entry = self.row(row['id'])
                         if orig_entry:
-                            self.record_change(dict(orig_entry),'modify')
+                            self.record_change(dict(orig_entry), 'modify')
                         statement = (
                             'UPDATE activitylog '
                             'SET start = ?, end = ?, duration = ? '

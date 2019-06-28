@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="23bec404-a994-4763-a91f-6a591a782d16" name="Default Changelist" comment="">
+    <list default="true" id="23bec404-a994-4763-a91f-6a591a782d16" name="Default Changelist" comment="Added the rest of the weekdays to snap_to_segment. Cultural bias is B.S. Did some reformatting in the tests file.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/death_awaits/helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/helper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/death_awaits/plots/activity_tiles.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/plots/activity_tiles.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/death_awaits/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/db.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/death_awaits/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/tests.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,7 +13,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.4978313">
+    <splitter split-orientation="horizontal" split-proportion="0.4972752">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="false">
@@ -64,8 +63,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/death_awaits/tests.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1178">
-                  <caret line="368" column="12" selection-start-line="368" selection-start-column="12" selection-end-line="368" selection-end-column="12" />
+                <state relative-caret-position="665">
+                  <caret line="85" column="38" selection-start-line="85" selection-start-column="38" selection-end-line="85" selection-end-column="38" />
                   <folding>
                     <element signature="e#0#10#0" expanded="true" />
                   </folding>
@@ -78,68 +77,6 @@
               <provider selected="true" editor-type-id="text-editor">
                 <state>
                   <caret column="10" selection-start-column="10" selection-end-column="10" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/death_awaits/db.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="874">
-                  <caret line="112" column="34" selection-start-line="112" selection-start-column="34" selection-end-line="112" selection-end-column="34" />
-                  <folding>
-                    <element signature="e#378#530#0" />
-                    <element signature="e#731#1958#0" />
-                    <element signature="e#1349#1958#0" />
-                    <element signature="e#1411#1870#0" />
-                    <element signature="e#1538#1648#0" />
-                    <element signature="e#1908#1958#0" />
-                    <element signature="e#2014#2279#0" />
-                    <element signature="e#2014#2118#1" />
-                    <element signature="e#2350#2680#0" />
-                    <element signature="e#2350#2514#1" />
-                    <element signature="e#4663#6262#0" />
-                    <element signature="e#4663#4752#1" />
-                    <element signature="e#4836#4971#0" />
-                    <element signature="e#5077#5449#0" />
-                    <element signature="e#5134#5418#0" />
-                    <element signature="e#5474#5569#0" />
-                    <element signature="e#5594#5696#0" />
-                    <element signature="e#5782#5896#0" />
-                    <element signature="e#6000#6211#0" />
-                    <element signature="e#6062#6179#0" />
-                    <element signature="e#6408#7666#0" />
-                    <element signature="e#6993#7543#0" />
-                    <element signature="e#7023#7120#0" />
-                    <element signature="e#7287#7468#0" />
-                    <element signature="e#7573#7666#0" />
-                    <element signature="e#7747#8929#0" />
-                    <element signature="e#7855#8191#0" />
-                    <element signature="e#7960#8191#0" />
-                    <element signature="e#8331#8498#0" />
-                    <element signature="e#8421#8498#0" />
-                    <element signature="e#8684#8777#0" />
-                    <element signature="e#8807#8853#0" />
-                    <element signature="e#8978#9507#0" />
-                    <element signature="e#9183#9290#0" />
-                    <element signature="e#9338#9401#0" />
-                    <element signature="e#9579#9898#0" />
-                    <element signature="e#9969#11543#0" />
-                    <element signature="e#10237#10922#0" />
-                    <element signature="e#10562#10922#0" />
-                    <element signature="e#10969#11070#0" />
-                    <element signature="e#11109#11422#0" />
-                    <element signature="e#11372#11422#0" />
-                    <element signature="e#11622#12735#0" />
-                    <element signature="e#11762#11855#0" />
-                    <element signature="e#11815#11855#0" />
-                    <element signature="e#11929#12650#0" />
-                    <element signature="e#12071#12203#0" />
-                    <element signature="e#12123#12203#0" />
-                    <element signature="e#12278#12488#0" />
-                    <element signature="e#12526#12576#0" />
-                    <element signature="e#12826#12971#1" />
-                  </folding>
                 </state>
               </provider>
             </entry>
@@ -175,7 +112,7 @@
             <entry file="file://$PROJECT_DIR$/death_awaits/helper.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="250">
-                  <caret line="155" column="12" selection-start-line="155" selection-start-column="12" selection-end-line="155" selection-end-column="12" />
+                  <caret line="124" column="4" selection-start-line="124" selection-start-column="4" selection-end-line="124" selection-end-column="4" />
                   <folding>
                     <element signature="e#25#35#0" expanded="true" />
                   </folding>
@@ -183,13 +120,25 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/setup.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="190">
                   <caret line="10" column="28" selection-start-line="10" selection-start-column="28" selection-end-line="10" selection-end-column="28" />
                   <folding>
                     <element signature="e#0#15#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/death_awaits/db.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="327">
+                  <caret line="696" selection-start-line="696" selection-end-line="696" />
+                  <folding>
+                    <element signature="e#0#9#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -223,10 +172,10 @@
         <option value="$PROJECT_DIR$/death_awaits/palettes.py" />
         <option value="$PROJECT_DIR$/death_awaits/main.py" />
         <option value="$PROJECT_DIR$/death_awaits/plots/activity_stack.py" />
-        <option value="$PROJECT_DIR$/death_awaits/db.py" />
         <option value="$PROJECT_DIR$/death_awaits/tile_view.py" />
         <option value="$PROJECT_DIR$/death_awaits/plots/activity_tiles.py" />
         <option value="$PROJECT_DIR$/death_awaits/helper.py" />
+        <option value="$PROJECT_DIR$/death_awaits/db.py" />
         <option value="$PROJECT_DIR$/death_awaits/tests.py" />
       </list>
     </option>
@@ -375,7 +324,14 @@
       <option name="project" value="LOCAL" />
       <updated>1560553359677</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Added the rest of the weekdays to snap_to_segment. Cultural bias is B.S. Did some reformatting in the tests file.">
+      <created>1561750881162</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1561750881162</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -383,15 +339,15 @@
     <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="1" sideWeight="0.5272586" visible="true" weight="0.12095808" />
+      <window_info content_ui="combo" id="Project" order="1" sideWeight="0.5272586" visible="true" weight="0.12095808" />
       <window_info anchor="bottom" id="Terminal" order="0" />
       <window_info anchor="bottom" id="Event Log" order="1" side_tool="true" />
       <window_info anchor="bottom" id="Python Console" order="2" />
       <window_info anchor="bottom" id="Message" order="3" />
       <window_info anchor="bottom" id="Find" order="4" weight="0.32883242" />
       <window_info anchor="bottom" id="Version Control" order="5" />
-      <window_info anchor="bottom" id="Run" order="6" weight="0.32962668" />
-      <window_info anchor="bottom" id="Debug" order="7" weight="0.4" />
+      <window_info anchor="bottom" x="183" y="521" width="2195" height="358" id="Run" maximized="true" order="6" type="WINDOWED" weight="0.28435266" />
+      <window_info anchor="bottom" id="Debug" order="7" weight="0.39952344" />
       <window_info anchor="bottom" id="Cvs" order="8" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="9" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="10" />
@@ -423,7 +379,73 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Minor formatting updates." />
     <MESSAGE value="Beginnings of Quantized Model." />
-    <option name="LAST_COMMIT_MESSAGE" value="Beginnings of Quantized Model." />
+    <MESSAGE value="Added the rest of the weekdays to snap_to_segment. Cultural bias is B.S. Did some reformatting in the tests file." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added the rest of the weekdays to snap_to_segment. Cultural bias is B.S. Did some reformatting in the tests file." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/death_awaits/tests.py</url>
+          <line>68</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>LogDb.__class__.__module__</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>LogDb.__class__</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>LogDb.__file__</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>__file__</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>row_a['duration'] / 60 / 60</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>str(row_a)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>row_a</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>row_a.values()</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>row_a.keys()</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>row_a.items()</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/setup.cfg" />
@@ -479,66 +501,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/db.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="874">
-          <caret line="112" column="34" selection-start-line="112" selection-start-column="34" selection-end-line="112" selection-end-column="34" />
-          <folding>
-            <element signature="e#378#530#0" />
-            <element signature="e#731#1958#0" />
-            <element signature="e#1349#1958#0" />
-            <element signature="e#1411#1870#0" />
-            <element signature="e#1538#1648#0" />
-            <element signature="e#1908#1958#0" />
-            <element signature="e#2014#2279#0" />
-            <element signature="e#2014#2118#1" />
-            <element signature="e#2350#2680#0" />
-            <element signature="e#2350#2514#1" />
-            <element signature="e#4663#6262#0" />
-            <element signature="e#4663#4752#1" />
-            <element signature="e#4836#4971#0" />
-            <element signature="e#5077#5449#0" />
-            <element signature="e#5134#5418#0" />
-            <element signature="e#5474#5569#0" />
-            <element signature="e#5594#5696#0" />
-            <element signature="e#5782#5896#0" />
-            <element signature="e#6000#6211#0" />
-            <element signature="e#6062#6179#0" />
-            <element signature="e#6408#7666#0" />
-            <element signature="e#6993#7543#0" />
-            <element signature="e#7023#7120#0" />
-            <element signature="e#7287#7468#0" />
-            <element signature="e#7573#7666#0" />
-            <element signature="e#7747#8929#0" />
-            <element signature="e#7855#8191#0" />
-            <element signature="e#7960#8191#0" />
-            <element signature="e#8331#8498#0" />
-            <element signature="e#8421#8498#0" />
-            <element signature="e#8684#8777#0" />
-            <element signature="e#8807#8853#0" />
-            <element signature="e#8978#9507#0" />
-            <element signature="e#9183#9290#0" />
-            <element signature="e#9338#9401#0" />
-            <element signature="e#9579#9898#0" />
-            <element signature="e#9969#11543#0" />
-            <element signature="e#10237#10922#0" />
-            <element signature="e#10562#10922#0" />
-            <element signature="e#10969#11070#0" />
-            <element signature="e#11109#11422#0" />
-            <element signature="e#11372#11422#0" />
-            <element signature="e#11622#12735#0" />
-            <element signature="e#11762#11855#0" />
-            <element signature="e#11815#11855#0" />
-            <element signature="e#11929#12650#0" />
-            <element signature="e#12071#12203#0" />
-            <element signature="e#12123#12203#0" />
-            <element signature="e#12278#12488#0" />
-            <element signature="e#12526#12576#0" />
-            <element signature="e#12826#12971#1" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/death_awaits/plots/activity_stack.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -568,16 +530,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/helper.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="250">
-          <caret line="155" column="12" selection-start-line="155" selection-start-column="12" selection-end-line="155" selection-end-column="12" />
-          <folding>
-            <element signature="e#25#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/setup.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="190">
@@ -588,10 +540,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/helper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="124" column="4" selection-start-line="124" selection-start-column="4" selection-end-line="124" selection-end-column="4" />
+          <folding>
+            <element signature="e#25#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/db.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="327">
+          <caret line="696" selection-start-line="696" selection-end-line="696" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/death_awaits/tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1178">
-          <caret line="368" column="12" selection-start-line="368" selection-start-column="12" selection-end-line="368" selection-end-column="12" />
+        <state relative-caret-position="665">
+          <caret line="85" column="38" selection-start-line="85" selection-start-column="38" selection-end-line="85" selection-end-column="38" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>

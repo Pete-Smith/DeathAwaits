@@ -25,8 +25,8 @@ COLUMNS = ('activity', 'start', 'end', 'duration')
 ENTRIES = (
     # (activity, start, end, duration)
     ('sleep', NOW, NOW + hours(8), None),
-    ('eat', NOW + hours(7), None, hours(1).seconds ),
-    ('eat', NOW + hours(7.5), None, hours(1).seconds ),
+    ('eat', NOW + hours(7), None, hours(1).seconds),
+    ('eat', NOW + hours(7.5), None, hours(1).seconds),
 )
 
 
@@ -49,26 +49,35 @@ class TestLogDb(unittest.TestCase):
 
     def test_insertion_start_duration(self):
         entry = self.test_data[0]
-        entry.update({'end':None, 'duration': hours(8)})
+        entry.update({'end': None, 'duration': hours(8)})
         id_ = self.db.create_entry(**entry)
         row = self.db.row(id_)
         self.assertEqual(row['activity'], entry['activity'])
         self.assertEqual(row['start'], entry['start'])
         self.assertEqual(row['end'], entry['start']+entry['duration'])
-        self.assertEqual(
-            row['duration'], entry['duration'].seconds
-        )
+        self.assertEqual(row['duration'], entry['duration'].seconds)
 
     def test_simple_overlap(self):
         entry_a = self.test_data[0]
         entry_b = self.test_data[1]
         id_a = self.db.create_entry(**entry_a)
+        row_a = self.db.row(id_a)
+        initial_duration = row_a['duration'] / 60 / 60
         id_b = self.db.create_entry(**entry_b)
         row_a = self.db.row(id_a)
+        current_duration = row_a['duration'] / 60 / 60
         row_b = self.db.row(id_b)
+        self.assertEqual(row_a['duration'] / 60 / 60, 8)
+        self.assertEqual(row_b['duration'] / 60 / 60, 1)
+        self.assertEqual(row_a['start'] + timedelta(hours=7), row_b['start'])
         self.assertEqual(
-            row_a['duration']+row_b['duration'],
-            (row_a['end'] - row_a['start']).seconds
+            row_b['start'] + timedelta(seconds=row_b['duration']), row_b['end']
+        )
+        self.assertLess(row_b['start'], row_a['end'])
+        self.assertEqual(row_b['end'], row_a['end'])
+        self.assertEqual(
+            (row_a['duration']+row_b['duration']) / 60 / 60,
+            (row_b['end'] - row_a['start']).total_seconds() / 60 / 60
         )
 
     def test_simple_combine(self):
