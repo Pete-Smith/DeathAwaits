@@ -37,24 +37,24 @@ class TestLogDb(unittest.TestCase):
 
     def test_insertion_start_end(self):
         entry = self.test_data[0]
-        entry.update({'end':entry['start']+hours(8),'duration':None})
-        id = self.db.create_entry(**entry)
-        row = self.db.row(id)
-        self.assertEqual(row['activity'],entry['activity'])
-        self.assertEqual(row['start'],entry['start'])
-        self.assertEqual(row['end'],entry['end'])
+        entry.update({'end': entry['start']+hours(8), 'duration': None})
+        id_ = self.db.create_entry(**entry)
+        row = self.db.row(id_)
+        self.assertEqual(row['activity'], entry['activity'])
+        self.assertEqual(row['start'], entry['start'])
+        self.assertEqual(row['end'], entry['end'])
         self.assertEqual(
             row['duration'], (entry['end']-entry['start']).seconds
         )
 
     def test_insertion_start_duration(self):
         entry = self.test_data[0]
-        entry.update({'end':None, 'duration':hours(8)})
-        id = self.db.create_entry(**entry)
-        row = self.db.row(id)
-        self.assertEqual(row['activity'],entry['activity'])
-        self.assertEqual(row['start'],entry['start'])
-        self.assertEqual(row['end'],entry['start']+entry['duration'])
+        entry.update({'end':None, 'duration': hours(8)})
+        id_ = self.db.create_entry(**entry)
+        row = self.db.row(id_)
+        self.assertEqual(row['activity'], entry['activity'])
+        self.assertEqual(row['start'], entry['start'])
+        self.assertEqual(row['end'], entry['start']+entry['duration'])
         self.assertEqual(
             row['duration'], entry['duration'].seconds
         )
@@ -77,7 +77,7 @@ class TestLogDb(unittest.TestCase):
         self.db.create_entry(**entry_a)
         id_b = self.db.create_entry(**entry_b)
         row_b = self.db.row(id_b)
-        self.assertEqual(entry_a['start'],row_b['start'])
+        self.assertEqual(entry_a['start'], row_b['start'])
         self.assertEqual(
             entry_b['start']
             + timedelta(seconds=entry_b['duration']),
@@ -90,57 +90,43 @@ class TestLogDb(unittest.TestCase):
         entry_a['duration'] = entry_a['duration'] / 2.0
         id_b = self.db.create_entry(**entry_a)
         entry_b = self.db.row(id_b)
-        self.assertEqual(id_a,id_b)
-        self.assertAlmostEqual(entry_a['duration'],entry_b['duration'])
+        self.assertEqual(id_a, id_b)
+        self.assertAlmostEqual(entry_a['duration'], entry_b['duration'])
 
     def test_simple_slice_contrib(self):
-        id = self.db.create_entry(**self.test_data[0])
-        entry = self.db.row(id)
-        end = entry['start'] + timedelta(
-            seconds=entry['duration']/2.0
-        )
-        contrib = self.db.slice_contrib(entry,entry['start'],end)
+        id_ = self.db.create_entry(**self.test_data[0])
+        entry = self.db.row(id_)
+        end = entry['start'] + timedelta(seconds=entry['duration']/2.0)
+        contrib = self.db.slice_contrib(entry, entry['start'],end)
         self.assertAlmostEqual(entry['duration']/2.0, contrib)
 
     def test_slice_contrib_row_within_span(self):
-        id = self.db.create_entry(**self.test_data[0])
-        entry = self.db.row(id)
-        start = entry['start'] - timedelta(
-            seconds=entry['duration']/4.0
-        )
-        end = entry['end'] + timedelta(
-            seconds=entry['duration']/4.0
-        )
-        contrib = self.db.slice_contrib(entry,start,end)
+        id_ = self.db.create_entry(**self.test_data[0])
+        entry = self.db.row(id_)
+        start = entry['start'] - timedelta(seconds=entry['duration']/4.0)
+        end = entry['end'] + timedelta(seconds=entry['duration']/4.0)
+        contrib = self.db.slice_contrib(entry, start, end)
         self.assertAlmostEqual(entry['duration'], contrib)
 
     def test_slice_contrib_span_within_row(self):
-        id = self.db.create_entry(**self.test_data[0])
-        entry = self.db.row(id)
-        start = entry['start'] + timedelta(
-            seconds=entry['duration']/4.0
-        )
-        end = entry['end'] - timedelta(
-            seconds=entry['duration']/4.0
-        )
-        contrib = self.db.slice_contrib(entry,start,end)
+        id_ = self.db.create_entry(**self.test_data[0])
+        entry = self.db.row(id_)
+        start = entry['start'] + timedelta(seconds=entry['duration']/4.0)
+        end = entry['end'] - timedelta(seconds=entry['duration']/4.0)
+        contrib = self.db.slice_contrib(entry, start, end)
         self.assertAlmostEqual(entry['duration']/2.0, contrib)
 
     def test_slice_contrib_span_outside_row(self):
-        id = self.db.create_entry(**self.test_data[0])
-        entry = self.db.row(id)
-        start = entry['start'] - timedelta(
-            seconds=entry['duration'] * 2
-        )
-        end = entry['end'] - timedelta(
-            seconds=entry['duration'] * 1.5
-        )
-        contrib = self.db.slice_contrib(entry,start,end)
+        id_ = self.db.create_entry(**self.test_data[0])
+        entry = self.db.row(id_)
+        start = entry['start'] - timedelta(seconds=entry['duration'] * 2)
+        end = entry['end'] - timedelta(seconds=entry['duration'] * 1.5)
+        contrib = self.db.slice_contrib(entry, start, end)
         self.assertAlmostEqual(0, contrib)
 
     def test_simple_slice_activities(self):
-        id = self.db.create_entry(**self.test_data[0])
-        entry = self.db.row(id)
+        id_ = self.db.create_entry(**self.test_data[0])
+        entry = self.db.row(id_)
         activities = self.db.slice_activities(
             start=entry['start'],
             end=(
@@ -154,8 +140,8 @@ class TestLogDb(unittest.TestCase):
         self.assertEqual(activities[entry['activity']], 0.5)
 
     def test_simple_span_slices(self):
-        id = self.db.create_entry(**self.test_data[0])
-        entry = self.db.row(id)
+        id_ = self.db.create_entry(**self.test_data[0])
+        entry = self.db.row(id_)
         chunks, activities = self.db.span_slices(
             start=entry['start'],
             span=entry['duration'] * 2.0,
@@ -172,40 +158,45 @@ class TestLogDb(unittest.TestCase):
 
     def test_entry_trimming_with_truncate(self):
         self.db.create_entry(
-            'sleep', datetime(2013,8,28,0,41), datetime(2013,8,28,6,0)
+            'sleep', datetime(2013, 8, 28, 0, 41), datetime(2013, 8, 28, 6, 0)
         )
         self.db.create_entry(
-            'bathroom', datetime(2013,8,28,6,28), datetime(2013,8,28,7,11)
+            'bathroom',
+            datetime(2013, 8, 28, 6, 28),
+            datetime(2013, 8, 28, 7, 11)
         )
         self.db.create_entry(
-            'sleep',datetime(2013,8,28,0,33),datetime(2013,8,28,6,41)
+            'sleep', datetime(2013, 8, 28, 0, 33), datetime(2013, 8, 28, 6, 41)
         )
         self.assertAlmostEqual(
             sum(self.db.slice_activities(
-                datetime(2013,8,28,6,30),datetime(2013,8,28,6,45),unrecorded=False,
+                datetime(2013, 8, 28, 6, 30),
+                datetime(2013, 8, 28, 6, 45),
+                unrecorded=False,
             ).values()
             ), 1.0
         )
 
     def test_entry_trimming_with_split(self):
         self.db.create_entry(
-            'sleep', datetime(2013,8,28,1,0), datetime(2013,8,28,4,0)
+            'sleep', datetime(2013, 8, 28, 1, 0), datetime(2013, 8, 28, 4, 0)
         )
         self.db.create_entry(
-            'bathroom', datetime(2013,8,28,1,30), datetime(2013,8,28,2,0)
+            'bathroom', datetime(2013, 8, 28, 1, 30), datetime(2013, 8, 28, 2, 0)
         )
-        #self.db.print_()
-        self.assertEqual(len(self.db.filter()),3)
+        self.assertEqual(len(self.db.filter()), 3)
         self.assertAlmostEqual(
             sum(self.db.slice_activities(
-                datetime(2013,8,28,1,0),datetime(2013,8,28,4,0),unrecorded=False,
+                datetime(2013, 8, 28, 1, 0),
+                datetime(2013, 8, 28, 4, 0),
+                unrecorded=False,
             ).values()
             ), 1.0
         )
 
     def test_simple_undo_redo(self):
         self.db.create_entry(
-            'sleep', datetime(2013,8,28,1,0), datetime(2013,8,28,4,0)
+            'sleep', datetime(2013, 8, 28, 1, 0), datetime(2013, 8, 28, 4, 0)
         )
         self.db.save_changes()
         self.assertEqual(len(self.db.filter()), 1)
@@ -220,15 +211,15 @@ class TestLogDb(unittest.TestCase):
     def test_compound_undo_redo(self):
         # Create two entries, then create an entry that overwrites.
         self.db.create_entry(
-            'sleep', datetime(2013,8,28,1,0), datetime(2013,8,28,4,0)
+            'sleep', datetime(2013, 8, 28, 1, 0), datetime(2013, 8, 28, 4, 0)
         )
         self.db.create_entry(
-            'bathroom', datetime(2013,8,28,4,0), datetime(2013,8,28,5,0)
+            'bathroom', datetime(2013, 8, 28, 4, 0), datetime(2013, 8, 28, 5, 0)
         )
         self.db.save_changes()
         self.assertEqual(len(self.db.filter()), 2)
         self.db.create_entry(
-            'sleep', datetime(2013,8,28,1,0), datetime(2013,8,28,6,0)
+            'sleep', datetime(2013, 8, 28, 1, 0), datetime(2013, 8, 28, 6, 0)
         )
         self.db.save_changes()
         self.assertEqual(len(self.db.filter()), 1)
@@ -239,16 +230,16 @@ class TestLogDb(unittest.TestCase):
 
     def test_first_last(self):
         self.db.create_entry(
-            'sleep', datetime(2013,8,27,22,0), datetime(2013,8,28,6,0)
+            'sleep', datetime(2013, 8, 27, 22, 0), datetime(2013, 8, 28, 6, 0)
         )
         self.db.create_entry(
-            'bathroom', datetime(2013,8,28,6,0), datetime(2013,8,28,7,0)
+            'bathroom', datetime(2013, 8, 28, 6, 0), datetime(2013, 8, 28, 7, 0)
         )
         self.db.create_entry(
-            'commute', datetime(2013,8,28,8,0), datetime(2013,8,28,9,0)
+            'commute', datetime(2013, 8, 28, 8, 0), datetime(2013, 8, 28, 9, 0)
         )
         self.db.create_entry(
-            'work', datetime(2013,8,28,9,0), datetime(2013,8,28,17,0)
+            'work', datetime(2013, 8, 28, 9, 0), datetime(2013, 8, 28, 17, 0)
         )
         self.assertEqual(self.db.filter(first=True)['activity'], 'sleep')
         self.assertEqual(self.db.filter(last=True)['activity'], 'work')
@@ -275,23 +266,23 @@ class TestLogDb(unittest.TestCase):
         )
 
     def test_shift_row_forward(self):
-        initial_time = datetime(2013,8,27,22,0)
+        initial_time = datetime(2013, 8, 27, 22, 0)
         length = timedelta(hours=8)
         shift_by = timedelta(hours=4)
-        id = self.db.create_entry( 'sleep', initial_time, initial_time + length)
-        self.db.shift_rows([id,], shift_by)
-        new_row = self.db.row(id)
+        id_ = self.db.create_entry('sleep', initial_time, initial_time + length)
+        self.db.shift_rows([id_,], shift_by)
+        new_row = self.db.row(id_)
         assert new_row['start'] == initial_time + shift_by
         assert new_row['end'] == initial_time + length + shift_by
         assert new_row['duration'] == length.total_seconds()
 
     def test_shift_row_backward(self):
-        initial_time = datetime(2013,8,27,22,0)
+        initial_time = datetime(2013, 8, 27, 22, 0)
         length = timedelta(hours=8)
         shift_by = timedelta(hours=-4)
-        id = self.db.create_entry( 'sleep', initial_time, initial_time + length)
-        self.db.shift_rows([id,], shift_by)
-        new_row = self.db.row(id)
+        id_ = self.db.create_entry('sleep', initial_time, initial_time + length)
+        self.db.shift_rows([id_, ], shift_by)
+        new_row = self.db.row(id_)
         assert new_row['start'] == initial_time + shift_by
         assert new_row['end'] == initial_time + length + shift_by
         assert new_row['duration'] == length.total_seconds()
@@ -302,7 +293,7 @@ class TestLogDb(unittest.TestCase):
         with parent categories.
         """
         entry_a = ('org : clean', NOW, NOW + hours(1), None)
-        entry_b = ('org', NOW +hours(1), NOW + hours(2), None)
+        entry_b = ('org', NOW + hours(1), NOW + hours(2), None)
         self.db.create_entry(*entry_a)
         self.db.create_entry(*entry_b)
         self.assertEqual(len(self.db.filter()), 2)
@@ -313,7 +304,7 @@ class TestLogDb(unittest.TestCase):
         number of spaces.
         """
         entry_a = ('  Org :   Clean', NOW, NOW + hours(1), None)
-        entry_b = ('org : clean', NOW +hours(1), NOW + hours(2), None)
+        entry_b = ('org : clean', NOW + hours(1), NOW + hours(2), None)
         self.db.create_entry(*entry_a)
         self.db.create_entry(*entry_b)
         self.assertEqual(len(self.db.filter()), 1)
@@ -362,7 +353,7 @@ class TestFilterPanel(unittest.TestCase):
         self.select_type("Week")
         year = 2013
         self.panel.year.setValue(year)
-        base_day = iso_to_gregorian(year,1,1)
+        base_day = iso_to_gregorian(year, 1, 1)
         base = datetime(base_day.year, base_day.month, base_day.day, 0, 0)
         for w in range(52):
             start = base + (w * timedelta(days=7))

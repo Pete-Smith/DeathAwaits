@@ -140,6 +140,7 @@ class ActivityTilesBase(PlotDialogBase):
             raise ValueError('Unknown nesting type.')
         return activities
 
+
 class ActivityTilesHourly(ActivityTilesBase):
     name = "Activity Tiles, Hourly"
     @staticmethod

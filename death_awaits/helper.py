@@ -9,7 +9,7 @@ import PyQt5.QtGui as gui
 import PyQt5.QtWidgets as widgets
 import PyQt5.QtCore as core
 import matplotlib as mpl
-from dateutil.relativedelta import relativedelta, MO, SU
+from dateutil.relativedelta import relativedelta, MO, SU, TU, WE, TH, FR, SA
 
 
 class Weekday(Enum):
@@ -120,7 +120,7 @@ def configure_matplotlib():
     mpl.rcParams['figure.facecolor'] = palette.color(palette.Window).name()
     mpl.rcParams['figure.dpi'] = app.desktop().physicalDpiX()
     #TODO
-    #mpl.rcParams['axes.facecolor'] = palette.color(palette.Base).name()
+    # mpl.rcParams['axes.facecolor'] = palette.color(palette.Base).name()
     mpl.rcParams['axes.facecolor'] = '#ffffff'
     foreground_colors = (
         'text.color','axes.edgecolor', 'figure.edgecolor', 'xtick.color',
@@ -139,7 +139,10 @@ def run_pdb():
         core.pyqtRestoreInputHook()
 
 
-def snap_to_segment(value: datetime.datetime, segment_size: SegmentSize, first_day_of_week: Weekday):
+def snap_to_segment(
+        value: datetime.datetime, segment_size: SegmentSize,
+        first_day_of_week: Weekday
+):
     """ Return a datetime value that is on the nearest segment boundary. """
     if segment_size >= SegmentSize.minute:
         if value.second > 30:
@@ -157,21 +160,34 @@ def snap_to_segment(value: datetime.datetime, segment_size: SegmentSize, first_d
         else:
             value = value - datetime.timedelta(hours=value.hour)
     if segment_size <= SegmentSize.week:
-        seconds_to_previous, seconds_to_next = 0, 0
-        if segment_size == SegmentSize.month:
+        if SegmentSize.month == segment_size:
             previous_boundary = value - datetime.timedelta(days=value.day)
             next_boundary = previous_boundary + relativedelta(months=+1)
         else:
             if first_day_of_week == value.weekday():
                 return value
-            if first_day_of_week == Weekday.monday:
-                previous_boundary = value + relativedelta(MO(-1))
-                next_boundary = value + relativedelta(MO(1))
-            elif first_day_of_week == Weekday.sunday:
-                previous_boundary = value + relativedelta(SU(-1))
-                next_boundary = value + relativedelta(SU(1))
+            weekday_func = None
+            if first_day_of_week == Weekday.sunday:
+                weekday_func = SU
+            elif first_day_of_week == Weekday.monday:
+                weekday_func = MO
+            elif first_day_of_week == Weekday.tuesday:
+                weekday_func = TU
+            elif first_day_of_week == Weekday.wednesday:
+                weekday_func = WE
+            elif first_day_of_week == Weekday.thursday:
+                weekday_func = TH
+            elif first_day_of_week == Weekday.friday:
+                weekday_func = FR
+            elif first_day_of_week == Weekday.saturday:
+                weekday_func = SA
+            if weekday_func is not None:
+                previous_boundary = value + relativedelta(weekday_func(-1))
+                next_boundary = value + relativedelta(weekday_func(1))
             else:
-                raise ValueError('First day of week must be Monday or Sunday.')
+                raise ValueError(
+                    f"Unknown weekday definition : {first_day_of_week}"
+                )
         seconds_to_previous = abs(
             (value - previous_boundary).total_seconds()
         )
