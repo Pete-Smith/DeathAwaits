@@ -391,7 +391,7 @@ class LogDb(core.QObject):
                     (LogDb.table_def[i][0], val) for i, val in enumerate(row)
                 ])
             )
-        times = {(start, end)}
+        times = {start, end}
         for row in overlaps:
             if start < row['start'] < end:
                 times.add(row['start'])

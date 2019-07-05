@@ -67,7 +67,7 @@ class TestLogDb(unittest.TestCase):
         row_a = self.db.row(id_a)
         current_duration = row_a['duration'] / 60 / 60
         row_b = self.db.row(id_b)
-        self.assertEqual(row_a['duration'] / 60 / 60, 8)
+        self.assertEqual(row_a['duration'] / 60 / 60, 7)
         self.assertEqual(row_b['duration'] / 60 / 60, 1)
         self.assertEqual(row_a['start'] + timedelta(hours=7), row_b['start'])
         self.assertEqual(
@@ -88,8 +88,7 @@ class TestLogDb(unittest.TestCase):
         row_b = self.db.row(id_b)
         self.assertEqual(entry_a['start'], row_b['start'])
         self.assertEqual(
-            entry_b['start']
-            + timedelta(seconds=entry_b['duration']),
+            entry_b['start'] + timedelta(seconds=entry_b['duration']),
             row_b['end']
         )
 
