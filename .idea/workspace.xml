@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="23bec404-a994-4763-a91f-6a591a782d16" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/death_awaits/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/death_awaits/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/death_awaits/plots/activity_tiles.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/plots/activity_tiles.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/death_awaits/tile_view.py" beforeDir="false" afterPath="$PROJECT_DIR$/death_awaits/tile_view.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -13,14 +13,13 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.4972752">
+    <splitter split-orientation="horizontal" split-proportion="0.46273434">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/death_awaits/plots/base.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1672">
-                  <caret line="93" column="8" selection-start-line="93" selection-start-column="8" selection-end-line="93" selection-end-column="8" />
+                <state>
                   <folding>
                     <element signature="e#0#15#0" expanded="true" />
                   </folding>
@@ -29,10 +28,22 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/death_awaits/helper.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="3116">
+                  <caret line="164" column="48" selection-start-line="164" selection-start-column="48" selection-end-line="164" selection-end-column="48" />
+                  <folding>
+                    <element signature="e#25#35#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/death_awaits/plots/activity_tiles.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="2451">
-                  <caret line="141" selection-start-line="141" selection-end-line="141" />
+                <state relative-caret-position="3667">
+                  <caret line="193" column="28" selection-start-line="193" selection-start-column="28" selection-end-line="193" selection-end-column="28" />
                   <folding>
                     <element signature="e#0#9#0" expanded="true" />
                   </folding>
@@ -43,7 +54,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/death_awaits/main.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="11552">
+                <state relative-caret-position="-8680">
                   <caret line="629" column="23" selection-start-line="629" selection-start-column="23" selection-end-line="629" selection-end-column="23" />
                 </state>
               </provider>
@@ -60,10 +71,10 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/death_awaits/tests.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="599">
+                <state relative-caret-position="1710">
                   <caret line="90" column="42" selection-start-line="90" selection-start-column="42" selection-end-line="90" selection-end-column="42" />
                   <folding>
                     <element signature="e#0#10#0" expanded="true" />
@@ -96,11 +107,11 @@
       </split-first>
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/death_awaits/tile_view.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1216">
-                  <caret line="75" column="42" selection-start-line="75" selection-start-column="42" selection-end-line="75" selection-end-column="42" />
+                <state relative-caret-position="380">
+                  <caret line="20" column="66" selection-start-line="20" selection-start-column="66" selection-end-line="20" selection-end-column="66" />
                   <folding>
                     <element signature="e#0#34#0" expanded="true" />
                   </folding>
@@ -109,34 +120,10 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/death_awaits/helper.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="2166">
-                  <caret line="124" column="4" selection-start-line="124" selection-start-column="4" selection-end-line="124" selection-end-column="4" />
-                  <folding>
-                    <element signature="e#25#35#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/setup.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="152">
-                  <caret line="10" column="28" selection-start-line="10" selection-start-column="28" selection-end-line="10" selection-end-column="28" />
-                  <folding>
-                    <element signature="e#0#15#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/death_awaits/db.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="285">
-                  <caret line="393" column="17" selection-start-line="393" selection-start-column="17" selection-end-line="393" selection-end-column="17" />
+                <state relative-caret-position="323">
+                  <caret line="17" column="31" selection-start-line="17" selection-start-column="31" selection-end-line="17" selection-end-column="31" />
                   <folding>
                     <element signature="e#0#9#0" expanded="true" />
                   </folding>
@@ -172,11 +159,11 @@
         <option value="$PROJECT_DIR$/death_awaits/palettes.py" />
         <option value="$PROJECT_DIR$/death_awaits/main.py" />
         <option value="$PROJECT_DIR$/death_awaits/plots/activity_stack.py" />
-        <option value="$PROJECT_DIR$/death_awaits/tile_view.py" />
-        <option value="$PROJECT_DIR$/death_awaits/plots/activity_tiles.py" />
         <option value="$PROJECT_DIR$/death_awaits/helper.py" />
         <option value="$PROJECT_DIR$/death_awaits/db.py" />
         <option value="$PROJECT_DIR$/death_awaits/tests.py" />
+        <option value="$PROJECT_DIR$/death_awaits/tile_view.py" />
+        <option value="$PROJECT_DIR$/death_awaits/plots/activity_tiles.py" />
       </list>
     </option>
   </component>
@@ -338,22 +325,28 @@
       <option name="project" value="LOCAL" />
       <updated>1561760612085</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Fixed the tests. Huzzah!">
+      <created>1562345741116</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1562345741116</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="2575" height="1415" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="1" sideWeight="0.5272586" visible="true" weight="0.1269461" />
       <window_info anchor="bottom" id="Terminal" order="0" />
-      <window_info anchor="bottom" id="Event Log" order="1" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="2" />
+      <window_info anchor="bottom" id="Event Log" order="1" sideWeight="0.5001996" side_tool="true" weight="0.32962668" />
+      <window_info anchor="bottom" id="Python Console" order="2" sideWeight="0.4998004" weight="0.32962668" />
       <window_info anchor="bottom" id="Message" order="3" />
       <window_info anchor="bottom" id="Find" order="4" weight="0.32883242" />
       <window_info anchor="bottom" id="Version Control" order="5" />
-      <window_info anchor="bottom" x="911" y="2289" width="2195" height="358" id="Run" maximized="true" order="6" type="WINDOWED" weight="0.28435266" />
+      <window_info anchor="bottom" x="183" y="521" width="2195" height="358" id="Run" maximized="true" order="6" type="WINDOWED" weight="0.28435266" />
       <window_info anchor="bottom" id="Debug" order="7" weight="0.39952344" />
       <window_info anchor="bottom" id="Cvs" order="8" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="9" weight="0.4" />
@@ -388,7 +381,8 @@
     <MESSAGE value="Beginnings of Quantized Model." />
     <MESSAGE value="Added the rest of the weekdays to snap_to_segment. Cultural bias is B.S. Did some reformatting in the tests file." />
     <MESSAGE value="Several of the LogDb tests are broken." />
-    <option name="LAST_COMMIT_MESSAGE" value="Several of the LogDb tests are broken." />
+    <MESSAGE value="Fixed the tests. Huzzah!" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed the tests. Huzzah!" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -471,98 +465,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/death_awaits/scrap.py" />
-    <entry file="file://$PROJECT_DIR$/death_awaits/plots/base.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1672">
-          <caret line="93" column="8" selection-start-line="93" selection-start-column="8" selection-end-line="93" selection-end-column="8" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/plots/activity_tiles.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2451">
-          <caret line="141" selection-start-line="141" selection-end-line="141" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="11552">
-          <caret line="629" column="23" selection-start-line="629" selection-start-column="23" selection-end-line="629" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/palettes.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="10" selection-start-column="10" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/plots/activity_stack.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/tile_view.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1216">
-          <caret line="75" column="42" selection-start-line="75" selection-start-column="42" selection-end-line="75" selection-end-column="42" />
-          <folding>
-            <element signature="e#0#34#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/helper.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2166">
-          <caret line="124" column="4" selection-start-line="124" selection-start-column="4" selection-end-line="124" selection-end-column="4" />
-          <folding>
-            <element signature="e#25#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/setup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="10" column="28" selection-start-line="10" selection-start-column="28" selection-end-line="10" selection-end-column="28" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/death_awaits/db.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="393" column="17" selection-start-line="393" selection-start-column="17" selection-end-line="393" selection-end-column="17" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Python/Lib/unittest/suite.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1976">
@@ -577,12 +479,103 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="114">
+          <caret line="6" column="52" selection-start-line="6" selection-start-column="52" selection-end-line="6" selection-end-column="52" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/plots/activity_stack.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/palettes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="10" selection-start-column="10" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/death_awaits/tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="599">
+        <state relative-caret-position="1710">
           <caret line="90" column="42" selection-start-line="90" selection-start-column="42" selection-end-line="90" selection-end-column="42" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/run.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/plots/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8680">
+          <caret line="629" column="23" selection-start-line="629" selection-start-column="23" selection-end-line="629" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/db.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="17" column="31" selection-start-line="17" selection-start-column="31" selection-end-line="17" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/helper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3116">
+          <caret line="164" column="48" selection-start-line="164" selection-start-column="48" selection-end-line="164" selection-end-column="48" />
+          <folding>
+            <element signature="e#25#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/plots/activity_tiles.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3667">
+          <caret line="193" column="28" selection-start-line="193" selection-start-column="28" selection-end-line="193" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/death_awaits/tile_view.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="20" column="66" selection-start-line="20" selection-start-column="66" selection-end-line="20" selection-end-column="66" />
+          <folding>
+            <element signature="e#0#34#0" expanded="true" />
           </folding>
         </state>
       </provider>

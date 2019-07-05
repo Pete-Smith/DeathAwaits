@@ -23,7 +23,7 @@ class ActivityTilesBase(PlotDialogBase):
         self._color_assignments = dict()
 
     def additional_widgets(self):
-        self.nesting_type =  widgets.QComboBox(self)
+        self.nesting_type = widgets.QComboBox(self)
         self.nesting_type.setEditable(False)
         self.nesting_type.addItems(self.nesting_types)
         self.nesting_type.setCurrentIndex(1)

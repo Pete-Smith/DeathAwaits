@@ -1,9 +1,11 @@
 from collections import namedtuple
 import datetime
 import re
+from copy import copy
 
 import PyQt5.QtCore as Core
 from PyQt5.QtCore import Qt
+from dateutil.relativedelta import relativedelta
 
 from death_awaits.db import LogDb
 from death_awaits.palettes import BasePalette
@@ -44,8 +46,52 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
         if first_day_of_week not in (Weekday.sunday, Weekday.monday):
             raise ValueError("First day of week must be Sunday or Monday.")
         self.first_day_of_week = first_day_of_week
-        self._cache = list()
+        self._cache = None
         self._ranked_activities = list()
+
+    @property
+    def start(self):
+        return getattr(self, '_start', None)
+
+    @start.setter
+    def start(self, value):
+        value = snap_to_segment(value, self.segment_size, self.first_day_of_week)
+        if self.end and value > self.end:
+            raise ValueError("Tried to set a start time after current end time.")
+        setattr(self, '_start', value)
+        self._cache = None
+
+    @property
+    def end(self):
+        return getattr(self, '_end', None)
+
+    @end.setter
+    def end(self, value):
+        value = snap_to_segment(value, self.segment_size, self.first_day_of_week)
+        if self.start and value < self.start:
+            raise ValueError(
+                "Tried to set a end time before current start time."
+            )
+        setattr(self, '_end', value)
+        self._cache = None
+
+    def segment_size_in_seconds(self):
+        if self.segment_size == SegmentSize.minute:
+            return 60
+        elif self.segment_size == SegmentSize.hour:
+            return 60 * 60
+        elif self.segment_size == SegmentSize.day:
+            return 24 * 60 * 60
+        elif self.segment_size == SegmentSize.week:
+            return 7 * 24 * 60 * 60
+        elif self.segment_size == SegmentSize.month:
+            raise AttributeError(
+                'There are a variable number of days per month.'
+            )
+        else:
+            raise ValueError(
+                f'Invalid segment_size attribute: f{self.segment_size}'
+            )
 
     def update_ranked_activities(self):
         category_count = len(self.palette)
@@ -80,29 +126,55 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
             items_shown.sort(key=lambda i: i[1], reverse=False)
         ranked_activities = [i[0] for i in items_shown]
         if self.sort_other == OtherSort.after_activities:
-            i = ranked_activities.index('unrecorded')
-            ranked_activities.pop(i)
+            try:
+                i = ranked_activities.index('other')
+                del ranked_activities[i]
+                ranked_activities.pop(i)
+                ranked_activities.append('other')
+            except ValueError:
+                pass
         elif self.sort_other == OtherSort.before_activities:
-            pass
+            try:
+                i = ranked_activities.index('other')
+                del ranked_activities[i]
+                ranked_activities.insert(0, 'other')
+            except ValueError:
+                pass
         if self.sort_unrecorded == UnrecordedSort.before_other:
             pass
         elif self.sort_unrecorded == UnrecordedSort.after_other:
             pass
         if ranked_activities != self._ranked_activities:
             self._ranked_activities = ranked_activities
-            #TODO: Provide a signal here.
-
-    def update_segments(self, start, end):
-        pass
+            self._cache = None
 
     def rowCount(self, parent=None):
-        return len(self._cache)
+        if self.segment_size != SegmentSize.month:
+            total_seconds = (self.end - self.start).total_seconds()
+            return int(total_seconds / self.segment_size_in_seconds())
+        else:
+            scan = copy(self.start)
+            count = 0
+            while scan <= self.end:
+                count += 1
+                scan = scan + relativedelta(months=+1)
+            return count
 
     def columnCount(self, parent=None):
         return len(self._ranked_activities)
 
     def data(self, index, role=Qt.DisplayRole):
-        pass
+        if self._cache is None:
+            self._cache = [None, ] * self.rowCount()
+        if self.segment_size != SegmentSize.month:
+            segment_start = self.start + datetime.timedelta(
+                seconds=self.segment_size_in_seconds() * index.row()
+            )
+            segment_end = segment_start + datetime.timedelta(
+                seconds=self.segment_size_in_seconds()
+            )
+        else:
+            pass
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         pass
