@@ -460,7 +460,7 @@ class LogDb(core.QObject):
                 overrun = current_total - slice_total
                 if overrun > 0.0:
                     break
-
+                #TODO : Start Here!
                 for i, amount in enumerate(contrib):
                     if amount <= 0:
                         continue
