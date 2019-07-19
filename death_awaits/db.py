@@ -407,7 +407,7 @@ class LogDb(core.QObject):
 
     def bounded_quantity(self, span: datetime.timedelta) -> int:
         """
-        Return a prorated quantity given a timedelta and the bounds setting,
+        Return a pro-rated quantity given a timedelta and the bounds setting,
         which represents units per hour.
         """
         return int(round((span.total_seconds() / 60 / 60) * self.bounds))
@@ -445,60 +445,87 @@ class LogDb(core.QObject):
                 previous = time
                 continue
             # Calculate the maximum allowable in the time slice.
-            slice_total = self.bounded_quantity(time - previous)
+            slice_max = self.bounded_quantity(time - previous)
             candidate_contrib = self.slice_contrib(
                 {'start': start, 'end': end, 'quantity': quantity},
                 previous, time
             )
+            if candidate_contrib > slice_max:
+                raise ValueError(
+                    'Failed sanity check. Inserted quantity is greater than '
+                    'size of slice to be inserted into.'
+                )
             while True:
                 contrib = [
                     self.slice_contrib(row, previous, time)
                     for row in overlaps
                 ]
+                contrib_scale = sorted(set(contrib))
                 contrib_sum = sum(contrib)
                 current_total = contrib_sum + candidate_contrib
-                overrun = current_total - slice_total
-                if overrun > 0.0:
+                overrun = current_total - slice_max
+                if overrun <= 0.0 or len(contrib_scale) == 0:
                     break
-                #TODO : Start Here!
+                # What's the largest and next largest contrib?
+                max_contrib = contrib_scale[-1]
+                if len(contrib_scale) > 1:
+                    next_largest_contrib = contrib_scale[-2]
+                else:
+                    next_largest_contrib = 0
+                # The adjustment opportunity for this step.
+                max_adjustment = (
+                        contrib.count(max_contrib)
+                        * (max_contrib - next_largest_contrib)
+                )
+                if overrun >= max_adjustment:
+                    subtraction_step = (
+                            max_adjustment / contrib.count(max_contrib)
+                    )
+                else:
+                    subtraction_step = (
+                        overrun / contrib.count(max_contrib)
+                    )
                 for i, amount in enumerate(contrib):
-                    if amount <= 0:
-                        continue
-                    shave = overrun * (amount / float(contrib_sum))
-                    overlaps[i]['quantity'] -= shave
-                    overlaps[i]['_touched'] = True
-                    if shave >= amount and overlaps[i]['quantity'] > 0:
-                        # We need a trim not a shave
-                        entry_a = overlaps[i]
-                        if (entry_a['start'] < previous
-                                and entry_a['end'] > time):
-                            # Entry spans beyond previous & time,
-                            # Split it in two.
-                            entry_b = copy.deepcopy(entry_a)
-                            entry_b['id'] = None
-                            del entry_b['_touched']
-                            entry_b['end'] = previous
-                            entry_a['start'] = time
-                            a_seconds = (
-                                entry_a['end'] - entry_a['start']
-                            ).total_seconds()
-                            b_seconds = (
-                                entry_b['end'] - entry_b['start']
-                            ).total_seconds()
-                            entry_b['quantity'] = (
-                                entry_b['quantity']
-                                * (b_seconds / (a_seconds + b_seconds))
-                            )
-                            entry_a['quantity'] = (
-                                entry_a['quantity']
-                                * (a_seconds / (a_seconds + b_seconds))
-                            )
-                            new_rows.append(entry_b)
-                        elif previous <= entry_a['start'] < time:
-                            entry_a['start'] = time
-                        elif previous <= entry_a['end'] < time:
-                            entry_a['end'] = previous
-            previous = time
+                    if amount == max_contrib:
+                        overlaps[i]['quantity'] -= subtraction_step
+                        overlaps[i]['_touched'] = True
+                        if (subtraction_step >= amount
+                                and overlaps[i]['quantity'] > 0):
+                            # We need a trim not a shave
+                            entry_a = overlaps[i]
+                            if (entry_a['start'] < previous
+                                    and entry_a['end'] > time):
+                                # Entry spans beyond previous & time,
+                                # Split it in two.
+                                entry_b = copy.deepcopy(entry_a)
+                                entry_b['id'] = None
+                                del entry_b['_touched']
+                                entry_b['end'] = previous
+                                entry_a['start'] = time
+                                # We can use seconds here because we're
+                                # using them to compare the duration of the
+                                # two slices. Not using them as the entry's
+                                # quantity.
+                                a_seconds = (
+                                        entry_a['end'] - entry_a['start']
+                                ).total_seconds()
+                                b_seconds = (
+                                        entry_b['end'] - entry_b['start']
+                                ).total_seconds()
+                                entry_b['quantity'] = (
+                                        entry_b['quantity']
+                                        * (b_seconds / (a_seconds + b_seconds))
+                                )
+                                entry_a['quantity'] = (
+                                        entry_a['quantity']
+                                        * (a_seconds / (a_seconds + b_seconds))
+                                )
+                                new_rows.append(entry_b)
+                            elif previous <= entry_a['start'] < time:
+                                entry_a['start'] = time
+                            elif previous <= entry_a['end'] < time:
+                                entry_a['end'] = previous
+            previous = time  # (for time in times)
         modified_ids = []
         removed_ids = []
         created_ids = []
@@ -554,8 +581,7 @@ class LogDb(core.QObject):
             self.entry_added.emit(id_)
 
     def slice_activities(
-        self, start, end, level=None, unrecorded=True, weekdays=None,
-        activity=None
+        self, start, end, level=None, unrecorded=True, activity=None
     ):
         """
         Return a dictionary of activity names to proportional time spent.
@@ -597,9 +623,9 @@ class LogDb(core.QObject):
         and a dictionary whose keys are activity names and whose values are
         proportions.
         """
-        if isinstance(chunk_size,datetime.timedelta):
+        if isinstance(chunk_size, datetime.timedelta):
             chunk_size = chunk_size.total_seconds()
-        if isinstance(span,datetime.timedelta):
+        if isinstance(span, datetime.timedelta):
             span = span.total_seconds()
         if span % chunk_size:
             chunk_size = span / round(span / float(chunk_size))
