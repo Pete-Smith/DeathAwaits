@@ -20,10 +20,10 @@ def hours(n):
     return minutes(n*60)
 
 
-COLUMNS = ('activity', 'start', 'end', 'duration')
+COLUMNS = ('activity', 'start', 'end', 'quantity')
 
 ENTRIES = (
-    # (activity, start, end, duration)
+    # (activity, start, end, quantity)
     ('sleep', NOW, NOW + hours(8), None),
     ('eat', NOW + hours(7), None, hours(1).seconds),
     ('eat', NOW + hours(7.5), None, hours(1).seconds),
@@ -32,51 +32,51 @@ ENTRIES = (
 
 class TestLogDb(unittest.TestCase):
     def setUp(self,):
-        self.db = LogDb(":memory:")
+        self.db = LogDb(":memory:", bounds=60, units='minutes')
         self.test_data = [dict(zip(COLUMNS, e)) for e in ENTRIES]
 
     def test_insertion_start_end(self):
         entry = self.test_data[0]
-        entry.update({'end': entry['start']+hours(8), 'duration': None})
+        entry.update({'end': entry['start']+hours(8), 'quantity': None})
         id_ = self.db.create_entry(**entry)
         row = self.db.row(id_)
         self.assertEqual(row['activity'], entry['activity'])
         self.assertEqual(row['start'], entry['start'])
         self.assertEqual(row['end'], entry['end'])
         self.assertEqual(
-            row['duration'], (entry['end']-entry['start']).seconds
+            row['quantity'], (entry['end']-entry['start']).total_seconds() / 60
         )
 
     def test_insertion_start_duration(self):
         entry = self.test_data[0]
-        entry.update({'end': None, 'duration': hours(8)})
+        entry.update({'end': None, 'quantity': hours(8)})
         id_ = self.db.create_entry(**entry)
         row = self.db.row(id_)
         self.assertEqual(row['activity'], entry['activity'])
         self.assertEqual(row['start'], entry['start'])
-        self.assertEqual(row['end'], entry['start']+entry['duration'])
-        self.assertEqual(row['duration'], entry['duration'].seconds)
+        self.assertEqual(row['end'], entry['start']+entry['quantity'])
+        self.assertEqual(row['quantity'], entry['quantity'].seconds)
 
     def test_simple_overlap(self):
         entry_a = self.test_data[0]
         entry_b = self.test_data[1]
         id_a = self.db.create_entry(**entry_a)
         row_a = self.db.row(id_a)
-        initial_duration = row_a['duration'] / 60 / 60
+        initial_duration = row_a['quantity'] / 60 / 60
         id_b = self.db.create_entry(**entry_b)
         row_a = self.db.row(id_a)
-        current_duration = row_a['duration'] / 60 / 60
+        current_duration = row_a['quantity'] / 60 / 60
         row_b = self.db.row(id_b)
-        self.assertEqual(row_a['duration'] / 60 / 60, 7)
-        self.assertEqual(row_b['duration'] / 60 / 60, 1)
+        self.assertEqual(row_a['quantity'] / 60 / 60, 7)
+        self.assertEqual(row_b['quantity'] / 60 / 60, 1)
         self.assertEqual(row_a['start'] + timedelta(hours=7), row_b['start'])
         self.assertEqual(
-            row_b['start'] + timedelta(seconds=row_b['duration']), row_b['end']
+            row_b['start'] + timedelta(seconds=row_b['quantity']), row_b['end']
         )
         self.assertLess(row_b['start'], row_a['end'])
         self.assertEqual(row_b['end'], row_a['end'])
         self.assertEqual(
-            (row_a['duration']+row_b['duration']) / 60 / 60,
+            (row_a['quantity']+row_b['quantity']) / 60 / 60,
             (row_b['end'] - row_a['start']).total_seconds() / 60 / 60
         )
 
@@ -88,47 +88,47 @@ class TestLogDb(unittest.TestCase):
         row_b = self.db.row(id_b)
         self.assertEqual(entry_a['start'], row_b['start'])
         self.assertEqual(
-            entry_b['start'] + timedelta(seconds=entry_b['duration']),
+            entry_b['start'] + timedelta(seconds=entry_b['quantity']),
             row_b['end']
         )
 
     def test_overwrite(self):
         id_a = self.db.create_entry(**self.test_data[1])
         entry_a = dict(self.db.row(id_a))
-        entry_a['duration'] = entry_a['duration'] / 2.0
+        entry_a['quantity'] = entry_a['quantity'] / 2.0
         id_b = self.db.create_entry(**entry_a)
         entry_b = self.db.row(id_b)
         self.assertEqual(id_a, id_b)
-        self.assertAlmostEqual(entry_a['duration'], entry_b['duration'])
+        self.assertAlmostEqual(entry_a['quantity'], entry_b['quantity'])
 
     def test_simple_slice_contrib(self):
         id_ = self.db.create_entry(**self.test_data[0])
         entry = self.db.row(id_)
-        end = entry['start'] + timedelta(seconds=entry['duration']/2.0)
+        end = entry['start'] + timedelta(seconds=entry['quantity']/2.0)
         contrib = self.db.slice_contrib(entry, entry['start'],end)
-        self.assertAlmostEqual(entry['duration']/2.0, contrib)
+        self.assertAlmostEqual(entry['quantity']/2.0, contrib)
 
     def test_slice_contrib_row_within_span(self):
         id_ = self.db.create_entry(**self.test_data[0])
         entry = self.db.row(id_)
-        start = entry['start'] - timedelta(seconds=entry['duration']/4.0)
-        end = entry['end'] + timedelta(seconds=entry['duration']/4.0)
+        start = entry['start'] - timedelta(seconds=entry['quantity']/4.0)
+        end = entry['end'] + timedelta(seconds=entry['quantity']/4.0)
         contrib = self.db.slice_contrib(entry, start, end)
-        self.assertAlmostEqual(entry['duration'], contrib)
+        self.assertAlmostEqual(entry['quantity'], contrib)
 
     def test_slice_contrib_span_within_row(self):
         id_ = self.db.create_entry(**self.test_data[0])
         entry = self.db.row(id_)
-        start = entry['start'] + timedelta(seconds=entry['duration']/4.0)
-        end = entry['end'] - timedelta(seconds=entry['duration']/4.0)
+        start = entry['start'] + timedelta(seconds=entry['quantity']/4.0)
+        end = entry['end'] - timedelta(seconds=entry['quantity']/4.0)
         contrib = self.db.slice_contrib(entry, start, end)
-        self.assertAlmostEqual(entry['duration']/2.0, contrib)
+        self.assertAlmostEqual(entry['quantity']/2.0, contrib)
 
     def test_slice_contrib_span_outside_row(self):
         id_ = self.db.create_entry(**self.test_data[0])
         entry = self.db.row(id_)
-        start = entry['start'] - timedelta(seconds=entry['duration'] * 2)
-        end = entry['end'] - timedelta(seconds=entry['duration'] * 1.5)
+        start = entry['start'] - timedelta(seconds=entry['quantity'] * 2)
+        end = entry['end'] - timedelta(seconds=entry['quantity'] * 1.5)
         contrib = self.db.slice_contrib(entry, start, end)
         self.assertAlmostEqual(0, contrib)
 
@@ -139,7 +139,7 @@ class TestLogDb(unittest.TestCase):
             start=entry['start'],
             end=(
                 entry['start']
-                + timedelta(seconds=entry['duration'] * 2.0)
+                + timedelta(seconds=entry['quantity'] * 2.0)
             ),
             level=1,
             unrecorded=True
@@ -152,8 +152,8 @@ class TestLogDb(unittest.TestCase):
         entry = self.db.row(id_)
         chunks, activities = self.db.span_slices(
             start=entry['start'],
-            span=entry['duration'] * 2.0,
-            chunk_size=entry['duration'] * 2.0,
+            span=entry['quantity'] * 2.0,
+            chunk_size=entry['quantity'] * 2.0,
             level=0,
             unrecorded=True,
         )
@@ -161,7 +161,7 @@ class TestLogDb(unittest.TestCase):
         self.assertEqual(len(chunks), 1)
         self.assertEqual(
             chunks[0],
-            entry['start'] + timedelta(seconds=entry['duration'])
+            entry['start'] + timedelta(seconds=entry['quantity'])
         )
 
     def test_entry_trimming_with_truncate(self):
@@ -257,17 +257,17 @@ class TestLogDb(unittest.TestCase):
         When adding an activity to a span, we want to use up the unrecorded
         time before decreasing the other activities.
         """
-        duration = timedelta(minutes=15).total_seconds()
-        span = (NOW, NOW + timedelta(seconds=duration * 4))
-        id_a = self.db.create_entry('activity a', span[0], span[1], duration)
-        id_b = self.db.create_entry('activity b', span[0], span[1], duration)
-        id_c = self.db.create_entry('activity c', span[0], span[1], duration)
+        quantity = timedelta(minutes=15).total_seconds()
+        span = (NOW, NOW + timedelta(seconds=quantity * 4))
+        id_a = self.db.create_entry('activity a', span[0], span[1], quantity)
+        id_b = self.db.create_entry('activity b', span[0], span[1], quantity)
+        id_c = self.db.create_entry('activity c', span[0], span[1], quantity)
         row_a = self.db.row(id_a)
         row_b = self.db.row(id_b)
         row_c = self.db.row(id_c)
-        self.assertAlmostEqual(row_a['duration'], duration)
-        self.assertAlmostEqual(row_b['duration'], duration)
-        self.assertAlmostEqual(row_c['duration'], duration)
+        self.assertAlmostEqual(row_a['quantity'], quantity)
+        self.assertAlmostEqual(row_b['quantity'], quantity)
+        self.assertAlmostEqual(row_c['quantity'], quantity)
         self.assertAlmostEqual(
             self.db.slice_activities(span[0], span[1], 1, True)['unrecorded'],
             0.25
@@ -282,7 +282,7 @@ class TestLogDb(unittest.TestCase):
         new_row = self.db.row(id_)
         assert new_row['start'] == initial_time + shift_by
         assert new_row['end'] == initial_time + length + shift_by
-        assert new_row['duration'] == length.total_seconds()
+        assert new_row['quantity'] == length.total_seconds()
 
     def test_shift_row_backward(self):
         initial_time = datetime(2013, 8, 27, 22, 0)
@@ -293,7 +293,7 @@ class TestLogDb(unittest.TestCase):
         new_row = self.db.row(id_)
         assert new_row['start'] == initial_time + shift_by
         assert new_row['end'] == initial_time + length + shift_by
-        assert new_row['duration'] == length.total_seconds()
+        assert new_row['quantity'] == length.total_seconds()
 
     def test_unmerged_subcategories(self):
         """

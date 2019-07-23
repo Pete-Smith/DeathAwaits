@@ -89,7 +89,7 @@ class LogDb(core.QObject):
                 )
                 c.execute(
                     "INSERT INTO settings (bounds, units, schema_version)"
-                    "VALUES (?, ?)", (bounds, units, self.schema_version)
+                    "VALUES (?, ?, ?)", (bounds, units, self.schema_version)
                 )
             finally:
                 c.close()
@@ -365,7 +365,7 @@ class LogDb(core.QObject):
             quantity: int = None
     ):
         """
-        If one of the time parameters (start, end, duration) are not given,
+        If one of the time parameters (start, end, quantity) are not given,
         this method will infer it from the other two.
 
         The databases bounds settings will be used in the following way:
@@ -401,7 +401,7 @@ class LogDb(core.QObject):
             else:
                 raise ValueError(
                     "Two of the three following parameters must be provided: "
-                    "start, end, and duration. "
+                    "start, end, and quantity. "
                 )
         return start, end, quantity
 
@@ -503,7 +503,7 @@ class LogDb(core.QObject):
                                 entry_b['end'] = previous
                                 entry_a['start'] = time
                                 # We can use seconds here because we're
-                                # using them to compare the duration of the
+                                # using them to compare the quantity of the
                                 # two slices. Not using them as the entry's
                                 # quantity.
                                 a_seconds = (
@@ -911,12 +911,12 @@ class LogDb(core.QObject):
             self.entry_removed.emit(id)
         for entry in change_entry['remove']:
             statement = (
-                "INSERT INTO activitylog (id, activity, start, end, duration) "
+                "INSERT INTO activitylog (id, activity, start, end, quantity) "
                 "VALUES (?, ?, ?, ?, ?)"
             )
             values = [
                 entry[r] for r in
-                ('id', 'activity', 'start', 'end', 'duration')
+                ('id', 'activity', 'start', 'end', 'quantity')
             ]
             c = self.connection.cursor()
             try:
@@ -933,12 +933,12 @@ class LogDb(core.QObject):
             try:
                 statement = (
                     'UPDATE activitylog '
-                    'SET start = ?, end = ?, duration = ? '
+                    'SET start = ?, end = ?, quantity = ? '
                     'WHERE id = ?'
                 )
                 values = (
                     entry['start'], entry['end'],
-                    entry['duration'], entry['id']
+                    entry['quantity'], entry['id']
                 )
                 c.execute(statement, values)
             finally:
@@ -1009,7 +1009,7 @@ class LogModel(core.QAbstractTableModel):
             data = self._cache[index.row()][column_name]
             if isinstance(data, datetime.datetime):
                 data = stringify_datetime(data)
-            elif column_name == 'duration':
+            elif column_name == 'quantity':
                 data = LogDb.format_duration(data)
             return data
         elif role == Qt.UserRole:
@@ -1033,12 +1033,12 @@ class LogModel(core.QAbstractTableModel):
             return LogDb.log_table_def[section][0].title()
 
     def create_entry(
-        self, activity, start, end, duration=None, id=None,
+        self, activity, start, end, quantity=None, id=None,
         apply_capitalization=False
     ):
         """ Create an entry and return the new id.  """
         return self._db.create_entry(
-            activity, start, end, duration, id, apply_capitalization
+            activity, start, end, quantity, id, apply_capitalization
         )
 
     def delete_entry(self, id_):
