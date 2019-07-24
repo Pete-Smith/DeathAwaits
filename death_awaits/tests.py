@@ -44,7 +44,8 @@ class TestLogDb(unittest.TestCase):
         self.assertEqual(row['start'], entry['start'])
         self.assertEqual(row['end'], entry['end'])
         self.assertEqual(
-            row['quantity'], (entry['end']-entry['start']).total_seconds() / 60
+            row['quantity'],
+            (entry['end']-entry['start']).total_seconds() / 60
         )
 
     def test_insertion_start_duration(self):
@@ -54,8 +55,11 @@ class TestLogDb(unittest.TestCase):
         row = self.db.row(id_)
         self.assertEqual(row['activity'], entry['activity'])
         self.assertEqual(row['start'], entry['start'])
-        self.assertEqual(row['end'], entry['start']+entry['quantity'])
-        self.assertEqual(row['quantity'], entry['quantity'].seconds)
+        self.assertEqual(
+            row['end'],
+            entry['start'] + entry['quantity']
+        )
+        self.assertEqual(row['quantity'], entry['quantity'].seconds / 60)
 
     def test_simple_overlap(self):
         entry_a = self.test_data[0]

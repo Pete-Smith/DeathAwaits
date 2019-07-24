@@ -25,7 +25,7 @@ class LogDb(core.QObject):
         ('activity', 'text'),
         ('start', 'timestamp'),
         ('end', 'timestamp'),
-        ('quantity', 'integer'),  # minutes as default
+        ('quantity', 'int'),  # minutes as default
     )
     settings_table_def = (
         ('id', 'integer PRIMARY KEY'),
@@ -118,6 +118,30 @@ class LogDb(core.QObject):
             finally:
                 c.close()
 
+    def _timedelta_to_quantity(self, timedelta: datetime.timedelta) -> float:
+        if self.units.lower().startswith('second'):
+            return int(timedelta.total_seconds())
+        elif self.units.lower().startswith('minute'):
+            return int(round(timedelta.total_seconds() / 60))
+        elif self.units.lower().startswith('hour'):
+            return int(round(timedelta.total_seconds() / 60 / 60))
+        elif self.units.lower().startswith('day'):
+            return int(round(timedelta.total_seconds() / 60 / 60 / 24))
+        else:
+            return int(timedelta.total_seconds() / 60)
+
+    def _quantity_to_timedelta(self, quantity: int) -> datetime.timedelta:
+        if self.units.lower().startswith('second'):
+            return datetime.timedelta(seconds=quantity)
+        elif self.units.lower().startswith('minute'):
+            return datetime.timedelta(minutes=quantity)
+        elif self.units.lower().startswith('hour'):
+            return datetime.timedelta(hours=quantity)
+        elif self.units.lower().startswith('day'):
+            return datetime.timedelta(hours=quantity * 24)
+        else:
+            return datetime.timedelta(minutes=quantity)
+
     @staticmethod
     def regexp(expr, item):
         """
@@ -200,6 +224,8 @@ class LogDb(core.QObject):
         apply_capitalization: bool = False,
     ):
         """ Return the id of the inserted entry.  """
+        if isinstance(quantity, datetime.timedelta):
+            quantity = self._timedelta_to_quantity(quantity)
         if id is not None:
             self.remove_entry(id)
         activity = self._check_activity(activity, apply_capitalization)
@@ -390,14 +416,11 @@ class LogDb(core.QObject):
             if quantity is None or quantity > target_quantity:
                 quantity = target_quantity
         else:
-            if quantity is not None and self.bounds > 0:
-                seconds_adjustment = self.bounds * 60 * 60
-            else:
-                seconds_adjustment = 1 * 60 * 60
-            if None not in (start, quantity):
-                end = start + datetime.timedelta(seconds=seconds_adjustment)
-            elif None not in (end, quantity):
-                start = end - datetime.timedelta(seconds=seconds_adjustment)
+            adjustment = self._quantity_to_timedelta(quantity)
+            if None not in (start, adjustment):
+                end = start + adjustment
+            elif None not in (end, adjustment):
+                start = end - adjustment
             else:
                 raise ValueError(
                     "Two of the three following parameters must be provided: "
@@ -410,7 +433,8 @@ class LogDb(core.QObject):
         Return a pro-rated quantity given a timedelta and the bounds setting,
         which represents units per hour.
         """
-        return int(round((span.total_seconds() / 60 / 60) * self.bounds))
+        span = self._timedelta_to_quantity(span)
+        return int(round(span * self.bounds))
 
     def _modify_overlaps(self, start, end, quantity):
         """
@@ -420,6 +444,8 @@ class LogDb(core.QObject):
         # A bounds setting of zero means that the quantities are unbounded.
         if self.bounds == 0:
             return None
+        if isinstance(quantity, datetime.timedelta):
+            quantity = self._timedelta_to_quantity(quantity)
         overlaps = list()
         new_rows = list()
         # Load the overlapping rows
@@ -455,7 +481,11 @@ class LogDb(core.QObject):
                     'Failed sanity check. Inserted quantity is greater than '
                     'size of slice to be inserted into.'
                 )
+            iteration = 0
             while True:
+                iteration += 1
+                if iteration > 1000000:
+                    raise OverflowError('Max iterations.')
                 contrib = [
                     self.slice_contrib(row, previous, time)
                     for row in overlaps
@@ -842,7 +872,7 @@ class LogDb(core.QObject):
 
     def slice_contrib(
             self, row, start: datetime.datetime, end: datetime.datetime
-    ) -> float:
+    ) -> int:
         """
         Return the quantity that a row contains within a given time span.
         """
@@ -858,9 +888,9 @@ class LogDb(core.QObject):
             quantity = row['quantity']
             if quantity is None:
                 quantity = self.bounded_quantity(row['end'] - row['start'])
-            return quantity * proportion
+            return int(round(quantity * proportion))
         else:
-            return 0.0
+            return 0
 
     def record_change(self, entry, action='add'):
         """
