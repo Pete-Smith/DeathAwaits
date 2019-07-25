@@ -25,8 +25,8 @@ COLUMNS = ('activity', 'start', 'end', 'quantity')
 ENTRIES = (
     # (activity, start, end, quantity)
     ('sleep', NOW, NOW + hours(8), None),
-    ('eat', NOW + hours(7), None, hours(1).seconds),
-    ('eat', NOW + hours(7.5), None, hours(1).seconds),
+    ('eat', NOW + hours(7), None, hours(1)),
+    ('eat', NOW + hours(7.5), None, hours(1)),
 )
 
 
@@ -66,13 +66,11 @@ class TestLogDb(unittest.TestCase):
         entry_b = self.test_data[1]
         id_a = self.db.create_entry(**entry_a)
         row_a = self.db.row(id_a)
-        initial_duration = row_a['quantity'] / 60 / 60
         id_b = self.db.create_entry(**entry_b)
         row_a = self.db.row(id_a)
-        current_duration = row_a['quantity'] / 60 / 60
         row_b = self.db.row(id_b)
-        self.assertEqual(row_a['quantity'] / 60 / 60, 7)
-        self.assertEqual(row_b['quantity'] / 60 / 60, 1)
+        self.assertEqual(row_a['quantity'], 7)
+        self.assertEqual(row_b['quantity'] / 60, 1)
         self.assertEqual(row_a['start'] + timedelta(hours=7), row_b['start'])
         self.assertEqual(
             row_b['start'] + timedelta(seconds=row_b['quantity']), row_b['end']
@@ -80,8 +78,8 @@ class TestLogDb(unittest.TestCase):
         self.assertLess(row_b['start'], row_a['end'])
         self.assertEqual(row_b['end'], row_a['end'])
         self.assertEqual(
-            (row_a['quantity']+row_b['quantity']) / 60 / 60,
-            (row_b['end'] - row_a['start']).total_seconds() / 60 / 60
+            (row_a['quantity']+row_b['quantity']) / 60,
+            (row_b['end'] - row_a['start']).total_seconds() / 60
         )
 
     def test_simple_combine(self):
@@ -92,7 +90,7 @@ class TestLogDb(unittest.TestCase):
         row_b = self.db.row(id_b)
         self.assertEqual(entry_a['start'], row_b['start'])
         self.assertEqual(
-            entry_b['start'] + timedelta(seconds=entry_b['quantity']),
+            entry_b['start'] + entry_b['quantity'],
             row_b['end']
         )
 
@@ -261,8 +259,8 @@ class TestLogDb(unittest.TestCase):
         When adding an activity to a span, we want to use up the unrecorded
         time before decreasing the other activities.
         """
-        quantity = timedelta(minutes=15).total_seconds()
-        span = (NOW, NOW + timedelta(seconds=quantity * 4))
+        quantity = 15
+        span = (NOW, NOW + timedelta(minutes=quantity * 4))
         id_a = self.db.create_entry('activity a', span[0], span[1], quantity)
         id_b = self.db.create_entry('activity b', span[0], span[1], quantity)
         id_c = self.db.create_entry('activity c', span[0], span[1], quantity)
@@ -286,7 +284,7 @@ class TestLogDb(unittest.TestCase):
         new_row = self.db.row(id_)
         assert new_row['start'] == initial_time + shift_by
         assert new_row['end'] == initial_time + length + shift_by
-        assert new_row['quantity'] == length.total_seconds()
+        assert new_row['quantity'] == length.total_seconds() / 60
 
     def test_shift_row_backward(self):
         initial_time = datetime(2013, 8, 27, 22, 0)
@@ -297,7 +295,7 @@ class TestLogDb(unittest.TestCase):
         new_row = self.db.row(id_)
         assert new_row['start'] == initial_time + shift_by
         assert new_row['end'] == initial_time + length + shift_by
-        assert new_row['quantity'] == length.total_seconds()
+        assert new_row['quantity'] == length.total_seconds() / 60
 
     def test_unmerged_subcategories(self):
         """

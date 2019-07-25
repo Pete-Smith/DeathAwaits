@@ -433,8 +433,8 @@ class LogDb(core.QObject):
         Return a pro-rated quantity given a timedelta and the bounds setting,
         which represents units per hour.
         """
-        span = self._timedelta_to_quantity(span)
-        return int(round(span * self.bounds))
+        hours = span.total_seconds() / 60 / 60
+        return int(round(hours * self.bounds))
 
     def _modify_overlaps(self, start, end, quantity):
         """
@@ -624,7 +624,8 @@ class LogDb(core.QObject):
         assert isinstance(start, datetime.datetime)
         assert isinstance(end, datetime.datetime)
         overlap = self.filter(start=start, end=end, activity=activity)
-        span = (end-start).total_seconds()
+        #span = (end-start).total_seconds()
+        span = self._timedelta_to_quantity(end - start)
         output = OrderedDict()
         for row in overlap:
             contrib = self.slice_contrib(row, start, end)
