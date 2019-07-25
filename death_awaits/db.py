@@ -551,9 +551,9 @@ class LogDb(core.QObject):
                                         * (a_seconds / (a_seconds + b_seconds))
                                 )
                                 new_rows.append(entry_b)
-                            elif previous <= entry_a['start'] < time:
+                            elif previous <= entry_a['start'] <= time:
                                 entry_a['start'] = time
-                            elif previous <= entry_a['end'] < time:
+                            elif previous <= entry_a['end'] <= time:
                                 entry_a['end'] = previous
             previous = time  # (for time in times)
         modified_ids = []
@@ -654,6 +654,10 @@ class LogDb(core.QObject):
         and a dictionary whose keys are activity names and whose values are
         proportions.
         """
+        if isinstance(span, (float, int)):
+            span = self._quantity_to_timedelta(span)
+        if isinstance(chunk_size, (float, int)):
+            chunk_size = self._quantity_to_timedelta(chunk_size)
         if isinstance(chunk_size, datetime.timedelta):
             chunk_size = chunk_size.total_seconds()
         if isinstance(span, datetime.timedelta):

@@ -9,6 +9,7 @@ setup_args = {
     'author': 'P.F. Smith',
     'author_email': 'pete at anagogical dot net',
     'install_requires': ['pyqt5', 'matplotlib', 'dateutil'],
+    'tests_require': ['pytest'],
     'entry_points': {
         'gui_scripts': [
             'death_awaits = death_awaits.main:run'

@@ -64,16 +64,17 @@ def test_simple_overlap(test_database, test_data):
     id_b = test_database.create_entry(**entry_b)
     row_a = test_database.row(id_a)
     row_b = test_database.row(id_b)
-    assert row_a['quantity'] == 7
+    assert row_a['quantity'] == 7 * 60
     assert row_b['quantity'] / 60 == 1
     assert row_a['start'] + timedelta(hours=7) == row_b['start']
     assert (
-        row_b['start'] + timedelta(seconds=row_b['quantity']) == row_b['end']
+        row_b['start'] + timedelta(seconds=row_b['quantity'] * 60)
+        == row_b['end']
     )
-    assert row_b['start'] < row_a['end']
-    assert row_b['end'] == row_a['end']
+    assert row_b['start'] == row_a['end']
+    assert row_b['end'] > row_a['end']
     assert (
-        (row_a['quantity']+row_b['quantity']) / 60 ==
+        row_a['quantity'] + row_b['quantity'] ==
         (row_b['end'] - row_a['start']).total_seconds() / 60
     )
 
@@ -101,7 +102,7 @@ def test_overwrite(test_database, test_data):
 def test_simple_slice_contrib(test_database, test_data):
     id_ = test_database.create_entry(**test_data[0])
     entry = test_database.row(id_)
-    end = entry['start'] + timedelta(seconds=entry['quantity']/2.0)
+    end = entry['start'] + timedelta(minutes=entry['quantity']/2.0)
     contrib = test_database.slice_contrib(entry, entry['start'],end)
     assert entry['quantity']/2.0 == pytest.approx(contrib)
 
@@ -118,8 +119,8 @@ def test_slice_contrib_row_within_span(test_database, test_data):
 def test_slice_contrib_span_within_row(test_database, test_data):
     id_ = test_database.create_entry(**test_data[0])
     entry = test_database.row(id_)
-    start = entry['start'] + timedelta(seconds=entry['quantity']/4.0)
-    end = entry['end'] - timedelta(seconds=entry['quantity']/4.0)
+    start = entry['start'] + timedelta(minutes=entry['quantity']/4.0)
+    end = entry['end'] - timedelta(minutes=entry['quantity']/4.0)
     contrib = test_database.slice_contrib(entry, start, end)
     assert entry['quantity']/2.0 == pytest.approx(contrib)
 
@@ -127,8 +128,8 @@ def test_slice_contrib_span_within_row(test_database, test_data):
 def test_slice_contrib_span_outside_row(test_database, test_data):
     id_ = test_database.create_entry(**test_data[0])
     entry = test_database.row(id_)
-    start = entry['start'] - timedelta(seconds=entry['quantity'] * 2)
-    end = entry['end'] - timedelta(seconds=entry['quantity'] * 1.5)
+    start = entry['start'] - timedelta(minutes=entry['quantity'] * 2)
+    end = entry['end'] - timedelta(minutes=entry['quantity'] * 1.5)
     contrib = test_database.slice_contrib(entry, start, end)
     assert 0 == pytest.approx(contrib)
 
@@ -140,7 +141,7 @@ def test_simple_slice_activities(test_database, test_data):
         start=entry['start'],
         end=(
             entry['start']
-            + timedelta(seconds=entry['quantity'] * 2.0)
+            + timedelta(minutes=entry['quantity'] * 2.0)
         ),
         level=1,
         unrecorded=True
@@ -161,7 +162,7 @@ def test_simple_span_slices(test_database, test_data):
     )
     assert activities['unrecorded'][0] == pytest.approx(0.5)
     assert len(chunks) == 1
-    assert chunks[0] == entry['start'] + timedelta(seconds=entry['quantity'])
+    assert chunks[0] == entry['start'] + timedelta(minutes=entry['quantity'])
 
 
 def test_entry_trimming_with_truncate(test_database, test_data):
