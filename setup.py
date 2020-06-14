@@ -8,7 +8,7 @@ setup_args = {
     'packages': find_packages(),
     'author': 'P.F. Smith',
     'author_email': 'pete at anagogical dot net',
-    'install_requires': ['pyqt5', 'matplotlib', 'dateutil'],
+    'install_requires': ['pyqt5', 'matplotlib', 'python-dateutil'],
     'tests_require': ['pytest'],
     'entry_points': {
         'gui_scripts': [

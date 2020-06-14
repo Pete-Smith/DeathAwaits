@@ -174,7 +174,7 @@ class Workspace(widgets.QWidget):
         self.setWindowTitle(APP_NAME)
         if filename is None:
             filename = ":memory:"
-        self._db = LogDb(filename)
+        self._db = LogDb(filename, bounds=60, units='minutes')
         # Widgets
         self.filter_panel = FilterPanel(self)
         self.list_panel = ListPanel(self._db, self)
@@ -1104,7 +1104,7 @@ def run(interactive=False):
     )
     if app is None:
         app = widgets.QApplication(sys.argv)
-    if platform.system() == 'Windows' and platform.release() == '7':
+    if platform.system() == 'Windows' and platform.release() in '7':
         app_id = '.'.join([ORG_NAME, APP_NAME])
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
     app.setWindowIcon(get_application_icon())
@@ -1128,12 +1128,13 @@ def get_database():
     """
     # This can't be in the helper module because it creates circular imports.
     # So it's here.
-    app = widgets.QApplication.instance()
+    app = widgets.QApplication.instance() or widgets.QApplication(sys.argv)
     app.setApplicationName(APP_NAME)
     app.setOrganizationName(ORG_NAME)
-    app_dir = gui.QDesktopServices.storageLocation(
-        gui.QDesktopServices.DataLocation
-    )
+    app_dir = core.QStandardPaths.writableLocation(core.QStandardPaths.AppDataLocation)
+    # app_dir = gui.QDesktopServices.storageLocation(
+    #     gui.QDesktopServices.DataLocation
+    # )
     filename = os.path.join(app_dir, "user_data.sqlite")
     return LogDb(filename)
 

@@ -65,46 +65,25 @@ class LogDb(core.QObject):
                     'The bounds and units parameters need '
                     'to be set to create a new database.'
                 )
-            c = self.connection.cursor()
+            cursor = self.connection.cursor()
             try:
-                c.execute(
-                    "CREATE TABLE activitylog (" + (
-                        ", ".join(
-                            ["{0} {1}".format(k, t)
-                             for k, t in LogDb.log_table_def
-                            ]
-                        )
-                    ) + ")"
-                )
-                c.execute("CREATE INDEX start_times ON activitylog (start)")
-                c.execute("CREATE INDEX end_times ON activitylog (end)")
-                c.execute(
-                    "CREATE TABLE settings (" + (
-                        ", ".join(
-                            ["{0} {1}".format(k, t)
-                             for k, t in LogDb.settings_table_def
-                             ]
-                        )
-                    ) + ")"
-                )
-                c.execute(
-                    "INSERT INTO settings (bounds, units, schema_version)"
-                    "VALUES (?, ?, ?)", (bounds, units, self.schema_version)
-                )
+                self._create_activitylog_table(cursor)
+                self._create_settings_table(cursor, bounds, units)
             finally:
-                c.close()
+                cursor.close()
                 self.connection.commit()
             self.bounds = bounds
             self.units = units
-        else:  # if new_file
-            c = self.connection.cursor()
+        else:  # if new_file == False
+            self._check_quantity_column()
+            cursor = self.connection.cursor()
             try:
-                c.execute('SELECT (bounds, units, schema_version) FROM settings')
-                row = c.fetchone()
+                cursor.execute('SELECT bounds, units, schema_version FROM settings')
+                row = cursor.fetchone()
                 self.bounds = row[0]
                 self.units = row[1]
                 if ((bounds is not None and bounds != self.bounds)
-                    or (units is not None and units != self.units)
+                        or (units is not None and units != self.units)
                 ):
                     raise ValueError(
                         'Passed mismatching bounds and/or units parameters '
@@ -115,8 +94,69 @@ class LogDb(core.QObject):
                         f'Expected schema version {self.schema_version} '
                         f'found schema vesion {row[2]}.'
                     )
+            except sqlite3.OperationalError as e:
+                if str(e).lower() == "no such table: settings":
+                    self._create_settings_table(cursor, bounds, units)
+                    self.bounds = bounds
+                    self.units = units
+                else:
+                    raise e
             finally:
-                c.close()
+                cursor.close()
+                self.connection.commit()
+
+    def _create_activitylog_table(self, cursor):
+        cursor.execute("DROP INDEX IF EXISTS start_times")
+        cursor.execute("DROP INDEX IF EXISTS end_times")
+        cursor.execute(
+            "CREATE TABLE activitylog (" + (
+                ", ".join(
+                    ["{0} {1}".format(k, t)
+                     for k, t in LogDb.log_table_def
+                     ]
+                )
+            ) + ")"
+        )
+        cursor.execute("CREATE INDEX start_times ON activitylog (start)")
+        cursor.execute("CREATE INDEX end_times ON activitylog (end)")
+
+    def _create_settings_table(self, cursor, bounds, units):
+        cursor.execute(
+            "CREATE TABLE settings (" + (
+                ", ".join(
+                    ["{0} {1}".format(k, t)
+                     for k, t in LogDb.settings_table_def
+                     ]
+                )
+            ) + ")"
+        )
+        cursor.execute(
+            "INSERT INTO settings (bounds, units, schema_version)"
+            " VALUES (?, ?, ?)", (bounds, units, self.schema_version)
+        )
+
+    def _check_quantity_column(self):
+        """
+        In older versions of the database, the quantity column was named duration. It was an integer of minutes.
+        """
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute('PRAGMA table_info(activitylog);')
+            columns = [row['name'] for row in cursor.fetchall()]
+            if 'duration' in columns:
+                cursor.execute('ALTER TABLE activitylog RENAME TO activitylog_old')
+                self._create_activitylog_table(cursor)
+                cursor.execute('SELECT * FROM activitylog_old')
+                for row in cursor.fetchall():
+                    cursor.execute(
+                        "INSERT INTO activitylog (activity, start, end, quantity) "
+                        "VALUES (?, ?, ?, ?)",
+                        (row['activity'], row['start'], row['end'], row['duration'])
+                    )
+                cursor.execute('DROP TABLE activitylog_old')
+        finally:
+            cursor.close()
+            self.connection.commit()
 
     def _timedelta_to_quantity(self, timedelta: datetime.timedelta) -> float:
         if self.units.lower().startswith('second'):
