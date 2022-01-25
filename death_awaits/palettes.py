@@ -1,3 +1,4 @@
+import sys
 import copy
 import random
 
@@ -7,8 +8,8 @@ import PyQt5.QtWidgets as widgets
 
 class BasePalette:
     """
-    Client code uses a palette object by passing in a name and getting back a color
-    hex code.
+    Client code uses a palette object by passing in a name
+    and getting back a color hex code.
     Use the get_application_palette function in this module to grab the current
     palette.
     Palette objects are persisted for a whole session and remember which colors
@@ -16,6 +17,7 @@ class BasePalette:
     The palette tries to give repeat names colors that they've been assigned
     before.
     """
+
     def __init__(self):
         self._past_assignments = dict()
         self.refresh()
@@ -55,7 +57,7 @@ class BasePalette:
                 if candidate in available:
                     color = candidate
                     weight = dict(self.available_colors)[color]
-                    self.available_colors.remove((color,weight))
+                    self.available_colors.remove((color, weight))
                     break
         if color is None and self.available_colors:
             weights_sum = sum([n[1] for n in self.available_colors])
@@ -75,8 +77,10 @@ class BasePalette:
 
 
 class TangoPalette(BasePalette):
+
     def __init__(self):
-        app = widgets.QApplication.instance() or widgets.QApplication(sys.argv)
+        app = (widgets.QApplication.instance()
+               or widgets.QApplication(sys.argv))
         bg_value = app.palette().color(gui.QPalette.Base).valueF()
         if bg_value < 33:
             dark = 20.0
@@ -132,7 +136,7 @@ def get_application_palette():
     current = app.property('current_palette')
     if current is None:
         current = TangoPalette()
-        app.setProperty('current_palette',current)
+        app.setProperty('current_palette', current)
     else:
         current.refresh()
     return current

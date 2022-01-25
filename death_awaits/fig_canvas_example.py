@@ -10,19 +10,22 @@
 # may be distributed without limitation.
 
 from __future__ import unicode_literals
-import sys, os, random
+import sys
+import os
+import random
 from PyQt5 import QtGui, QtCore
 
 from numpy import arange, sin, pi
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as Canvas
 from matplotlib.figure import Figure
 
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
 
-class MyMplCanvas(FigureCanvas):
+class MyMplCanvas(Canvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
+
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
@@ -32,13 +35,12 @@ class MyMplCanvas(FigureCanvas):
         self.compute_initial_figure()
 
         #
-        FigureCanvas.__init__(self, fig)
+        Canvas.__init__(self, fig)
         self.setParent(parent)
 
-        FigureCanvas.setSizePolicy(self,
-                                   QtGui.QSizePolicy.Expanding,
-                                   QtGui.QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
+        Canvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,
+                             QtGui.QSizePolicy.Expanding)
+        Canvas.updateGeometry(self)
 
     def compute_initial_figure(self):
         pass
@@ -46,32 +48,35 @@ class MyMplCanvas(FigureCanvas):
 
 class MyStaticMplCanvas(MyMplCanvas):
     """Simple canvas with a sine plot."""
+
     def compute_initial_figure(self):
         t = arange(0.0, 3.0, 0.01)
-        s = sin(2*pi*t)
+        s = sin(2 * pi * t)
         self.axes.plot(t, s)
 
 
 class MyDynamicMplCanvas(MyMplCanvas):
     """A canvas that updates itself every second with a new plot."""
+
     def __init__(self, *args, **kwargs):
         MyMplCanvas.__init__(self, *args, **kwargs)
         timer = QtCore.QTimer(self)
-        QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.update_figure)
+        QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"),
+                               self.update_figure)
         timer.start(1000)
 
     def compute_initial_figure(self):
-         self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
 
     def update_figure(self):
         # Build a list of 4 random integers between 0 and 10 (both inclusive)
-        l = [ random.randint(0, 10) for i in range(4) ]
-
-        self.axes.plot([0, 1, 2, 3], l, 'r')
+        test = [random.randint(0, 10) for i in range(4)]
+        self.axes.plot([0, 1, 2, 3], test, 'r')
         self.draw()
 
 
 class ApplicationWindow(QtGui.QMainWindow):
+
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -90,11 +95,11 @@ class ApplicationWindow(QtGui.QMainWindow):
 
         self.main_widget = QtGui.QWidget(self)
 
-        l = QtGui.QVBoxLayout(self.main_widget)
+        layout = QtGui.QVBoxLayout(self.main_widget)
         sc = MyStaticMplCanvas(self.main_widget, width=5, height=4, dpi=100)
         dc = MyDynamicMplCanvas(self.main_widget, width=5, height=4, dpi=100)
-        l.addWidget(sc)
-        l.addWidget(dc)
+        layout.addWidget(sc)
+        layout.addWidget(dc)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -108,16 +113,15 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.fileQuit()
 
     def about(self):
-        QtGui.QMessageBox.about(self, "About",
-"""embedding_in_qt4.py example
+        QtGui.QMessageBox.about(
+            self, "About", """embedding_in_qt4.py example
 Copyright 2005 Florent Rougon, 2006 Darren Dale
 
 This program is a simple example of a Qt4 application embedding matplotlib
 canvases.
 
 It may be used and modified with no restriction; raw copies as well as
-modified versions may be distributed without limitation."""
-)
+modified versions may be distributed without limitation.""")
 
 
 qApp = QtGui.QApplication(sys.argv)
@@ -126,4 +130,4 @@ aw = ApplicationWindow()
 aw.setWindowTitle("%s" % progname)
 aw.show()
 sys.exit(qApp.exec_())
-#qApp.exec_()
+# qApp.exec_()

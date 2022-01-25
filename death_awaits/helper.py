@@ -56,7 +56,7 @@ def iso_year_start(iso_year):
     http://stackoverflow.com/questions/304256/whats-the-best-way-to-find-the-inverse-of-datetime-isocalendar
     """
     fourth_jan = datetime.date(iso_year, 1, 4)
-    delta = datetime.timedelta(fourth_jan.isoweekday()-1)
+    delta = datetime.timedelta(fourth_jan.isoweekday() - 1)
     return fourth_jan - delta
 
 
@@ -67,13 +67,13 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     http://stackoverflow.com/questions/304256/whats-the-best-way-to-find-the-inverse-of-datetime-isocalendar
     """
     year_start = iso_year_start(iso_year)
-    return year_start + datetime.timedelta(days=iso_day-1, weeks=iso_week-1)
+    return year_start + datetime.timedelta(days=iso_day - 1,
+                                           weeks=iso_week - 1)
 
 
 def get_icon(name):
     return gui.QIcon(
-        resource_filename('death_awaits', 'icons/{0}'.format(name))
-    )
+        resource_filename('death_awaits', 'icons/{0}'.format(name)))
 
 
 def get_application_icon():
@@ -114,18 +114,17 @@ def configure_matplotlib():
     mpl.rcParams['backend'] = 'QtAgg'
     mpl.rcParams['interactive'] = True
     mpl.rcParams['font.family'] = ", ".join((
-        font.family(), font.defaultFamily(),
+        font.family(),
+        font.defaultFamily(),
     ))
     mpl.rcParams['font.size'] = font.pointSizeF()
     mpl.rcParams['figure.facecolor'] = palette.color(palette.Window).name()
     mpl.rcParams['figure.dpi'] = app.desktop().physicalDpiX()
-    #TODO
+    # TODO
     # mpl.rcParams['axes.facecolor'] = palette.color(palette.Base).name()
     mpl.rcParams['axes.facecolor'] = '#ffffff'
-    foreground_colors = (
-        'text.color','axes.edgecolor', 'figure.edgecolor', 'xtick.color',
-        'ytick.color'
-    )
+    foreground_colors = ('text.color', 'axes.edgecolor', 'figure.edgecolor',
+                         'xtick.color', 'ytick.color')
     for k in foreground_colors:
         mpl.rcParams[k] = palette.color(palette.WindowText).name()
 
@@ -139,24 +138,22 @@ def run_pdb():
         core.pyqtRestoreInputHook()
 
 
-def snap_to_segment(
-        value: datetime.datetime, segment_size: SegmentSize,
-        first_day_of_week: Weekday
-):
+def snap_to_segment(value: datetime.datetime, segment_size: SegmentSize,
+                    first_day_of_week: Weekday):
     """ Return a datetime value that is on the nearest segment boundary. """
     if segment_size >= SegmentSize.minute:
         if value.second > 30:
-            value = value + datetime.timedelta(seconds=60-value.second)
+            value = value + datetime.timedelta(seconds=60 - value.second)
         else:
             value = value - datetime.timedelta(seconds=value.second)
     if segment_size >= SegmentSize.hour:
         if value.minute > 30:
-            value = value + datetime.timedelta(minutes=60-value.minute)
+            value = value + datetime.timedelta(minutes=60 - value.minute)
         else:
             value = value - datetime.timedelta(minutes=value.minute)
     if segment_size >= SegmentSize.day:
         if value.hour > 12:
-            value = value + datetime.timedelta(hours=24-value.hour)
+            value = value + datetime.timedelta(hours=24 - value.hour)
         else:
             value = value - datetime.timedelta(hours=value.hour)
     if segment_size <= SegmentSize.week:
@@ -186,11 +183,8 @@ def snap_to_segment(
                 next_boundary = value + relativedelta(weekday_func(1))
             else:
                 raise ValueError(
-                    f"Unknown weekday definition : {first_day_of_week}"
-                )
-        seconds_to_previous = abs(
-            (value - previous_boundary).total_seconds()
-        )
+                    f"Unknown weekday definition : {first_day_of_week}")
+        seconds_to_previous = abs((value - previous_boundary).total_seconds())
         seconds_to_next = abs((next_boundary - value).total_seconds())
         if seconds_to_previous <= seconds_to_next:
             value = value - datetime.timedelta(seconds_to_previous)

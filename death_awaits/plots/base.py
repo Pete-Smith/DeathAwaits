@@ -10,14 +10,14 @@ class PlotDialogBase(Widgets.QWidget):
     name = "*** A VERBOSE NAME ***"
 
     def __init__(self, parent=None):
-        super(PlotDialogBase,  self).__init__(parent)
+        super(PlotDialogBase, self).__init__(parent)
         # Layout
         layout = Widgets.QGridLayout()
         row = 0
         max_column = 0
         for aw in self.additional_widgets():
             if len(aw) == 1:
-                layout.addWidget(aw[0],row,0,1,max_column)
+                layout.addWidget(aw[0], row, 0, 1, max_column)
             for column, w in enumerate(aw):
                 layout.addWidget(w, row, column)
                 if column > max_column:
@@ -45,18 +45,13 @@ class PlotDialogBase(Widgets.QWidget):
         categories_label = Widgets.QLabel("Number of Categories:", self)
         categories_label.setBuddy(self.categories)
         self.inclusive_other = Widgets.QCheckBox(
-            "Other category includes non-matching activities.", self
-        )
-        return [
-            (level_label, self.level),
-            (categories_label,self.categories),
-            (self.inclusive_other,)
-        ]
+            "Other category includes non-matching activities.", self)
+        return [(level_label, self.level), (categories_label, self.categories),
+                (self.inclusive_other, )]
 
     def plot(self, figure, database, activity, start, end):
-        if database.filter(
-            activity=activity, start=start, end=end, first=True
-        ) and activity != 'unrecorded':
+        if database.filter(activity=activity, start=start, end=end,
+                           first=True) and activity != 'unrecorded':
             self._plot(figure, database, activity, start, end)
 
     def _plot(self, figure, database, activity, start, end):
@@ -79,12 +74,8 @@ class PlotDialogBase(Widgets.QWidget):
             if last['end'] < end:
                 end = last['end']
                 end = end + datetime.timedelta(days=1)
-        start = datetime.datetime(
-            start.year, start.month, start.day, 0, 0, 0
-        )
-        end = datetime.datetime(
-            end.year, end.month, end.day, 0, 0, 0
-        )
+        start = datetime.datetime(start.year, start.month, start.day, 0, 0, 0)
+        end = datetime.datetime(end.year, end.month, end.day, 0, 0, 0)
         return start, end
 
     def ranked_activities(self, database, activity, start, end):
@@ -109,21 +100,19 @@ class PlotDialogBase(Widgets.QWidget):
             for k, v in items_shown:
                 m = reg.search(k)
                 if m:
-                    new_items.append((k, v),)
+                    new_items.append((k, v), )
                 elif self.inclusive_other.isChecked():
                     other.append(v)
             if other:
-                new_items.append(('other', sum(other)),)
+                new_items.append(('other', sum(other)), )
             items_shown = new_items
         items_shown.sort(key=lambda i: i[1], reverse=True)
         if len(items_shown) > category_count:
             other = sum([n[1] for n in items_shown[category_count:]])
             items_shown = items_shown[:category_count]
-            other_value = sum([
-                n[1] for n in items_shown
-                if n[0] == 'other'
-            ]) or 0
-            items_shown.append(('other', other + other_value),)
+            other_value = sum([n[1]
+                               for n in items_shown if n[0] == 'other']) or 0
+            items_shown.append(('other', other + other_value), )
         return items_shown
 
     @property
