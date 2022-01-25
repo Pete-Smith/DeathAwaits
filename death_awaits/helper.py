@@ -111,7 +111,7 @@ def configure_matplotlib():
     app = widgets.QApplication.instance() or widgets.QApplication(sys.argv)
     font = app.font()
     palette = app.palette()
-    mpl.rcParams['backend'] = 'Qt4Agg'
+    mpl.rcParams['backend'] = 'QtAgg'
     mpl.rcParams['interactive'] = True
     mpl.rcParams['font.family'] = ", ".join((
         font.family(), font.defaultFamily(),
