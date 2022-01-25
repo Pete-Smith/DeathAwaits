@@ -53,7 +53,7 @@ class ActivityTilesBase(PlotDialogBase):
 
     def _plot(self, figure, database, activity, start, end):
         self._color_assignments.clear()
-        axes = figure.add_subplot('111')
+        axes = figure.add_subplot(111)
         axes.axis('scaled')
         self._plot_data(axes, database, activity, start, end)
         axes.relim()

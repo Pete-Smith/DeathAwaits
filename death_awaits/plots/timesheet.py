@@ -62,7 +62,7 @@ class TimeSheet(PlotDialogBase):
             reverse=True
         )
         #run_pdb()
-        axes = figure.add_subplot('111')
+        axes = figure.add_subplot(111)
         celltext = list()
         for k in activity_labels:
             if self.verbose_times.isChecked():

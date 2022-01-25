@@ -92,7 +92,7 @@ class ActivityStack(PlotDialogBase):
         self.sample_field.setText(LogDb.format_duration(new))
 
     def _plot(self, figure, database, activity, start, end):
-        axes = figure.add_subplot('111')
+        axes = figure.add_subplot(111)
         start, end = self.bracket(database, '', start, end)
         chunk_size = LogDb.parse_duration(self.sample_field.text())
         level = self.level.value()
@@ -217,7 +217,7 @@ class ActivityStackDay(ActivityStack):
         weekdays = None
         if hasattr(self,'weekday_selector'):
             weekdays = self.weekday_selector.selection()
-        axes = figure.add_subplot('111', xmargin=0, ymargin=0)
+        axes = figure.add_subplot(111, xmargin=0, ymargin=0)
         start, end = self.bracket(database, '', start, end)
         chunk_size = LogDb.parse_duration(self.sample_field.text())
         level = self.level.value()

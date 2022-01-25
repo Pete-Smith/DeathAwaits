@@ -40,7 +40,8 @@ class PieChart(PlotDialogBase):
             if self.show_percentages.isChecked() and val > 8:
                 return "{0:.1f}%".format(val)
             return ''
-        axes = figure.add_subplot('111')
+
+        axes = figure.add_subplot(111)
         axes.set_aspect('equal')
         if activity != 'unrecorded':
             start, end = self.bracket(database, '', start, end)
