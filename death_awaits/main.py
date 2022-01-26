@@ -7,6 +7,7 @@ from functools import partial
 import shutil
 import platform
 import ctypes
+import re
 
 import PyQt5.QtGui as gui
 import PyQt5.QtCore as core
@@ -639,6 +640,7 @@ class AdjustDialog(widgets.QDialog):
 
 class EntryEditor(widgets.QGroupBox):
     changed = core.pyqtSignal()
+    percentile_finder = re.compile(r'^\s*(?P<number>\d+)\s*%\s*$')
 
     def __init__(self, database, parent=None):
         super(EntryEditor, self).__init__("Entry:", parent)
@@ -808,7 +810,17 @@ class EntryEditor(widgets.QGroupBox):
             self.seconds = current_quantity
         quantity_text = LogDb.format_duration(self.seconds)
         self.quantity_field.setText(quantity_text)
+
+    def percentile_quantity(self, text):
+        m = self.percentile_finder.search(text)
+        if m:
+            percent = int(m.group('number'))
+            self.link.setChecked(False)
+            return self.seconds * (percent / 100.0)
+
     def quantity_edited(self):
+        text = self.quantity_field.text()
+        new = self.percentile_quantity(text) or LogDb.parse_duration(text)
         if new is None:
             if self.link.isChecked() or self.seconds is None:
                 new = self.start_end_seconds
