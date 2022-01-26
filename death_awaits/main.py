@@ -588,8 +588,8 @@ class AdjustDialog(widgets.QDialog):
         box_group.addButton(self.forward_box)
         box_group.addButton(self.backward_box)
         box_group.setExclusive(True)
-        self.duration = widgets.QLineEdit("24h", self)
-        duration_label = widgets.QLabel("Amount:", self)
+        self.quantity = widgets.QLineEdit("24h", self)
+        quantity_label = widgets.QLabel("Amount:", self)
         bbox = widgets.QDialogButtonBox(widgets.QDialogButtonBox.Ok
                                         | widgets.QDialogButtonBox.Cancel,
                                         parent=self)
@@ -600,8 +600,8 @@ class AdjustDialog(widgets.QDialog):
         col1.addWidget(self.forward_box)
         col1.addWidget(self.backward_box)
         row1.addLayout(col1)
-        row1.addWidget(duration_label)
-        row1.addWidget(self.duration)
+        row1.addWidget(quantity_label)
+        row1.addWidget(self.quantity)
         main.addLayout(row1)
         row2 = widgets.QHBoxLayout()
         row2.addStretch(1)
@@ -611,24 +611,24 @@ class AdjustDialog(widgets.QDialog):
         # Connections
         bbox.accepted.connect(self.accept)
         bbox.rejected.connect(self.reject)
-        self.duration.textChanged.connect(self._duration_edited)
-        self.duration.editingFinished.connect(
-            partial(self._duration_edited, True))
+        self.quantity.textChanged.connect(self._quantity_edited)
+        self.quantity.editingFinished.connect(
+            partial(self._quantity_edited, True))
 
-    def _duration_edited(self, fix=False):
+    def _quantity_edited(self, fix=False):
         pass
         # TODO
-        # seconds = LogDb.parse_duration(self.duration.text())
+        # seconds = LogDb.parse_duration(self.quantity.text())
         # if seconds is None:
-        #     self.duration.setStyleSheet(INVALID_STYLE)
+        #     self.quantity.setStyleSheet(INVALID_STYLE)
         # else:
-        #     self.duration.setStyleSheet(VALID_STYLE)
+        #     self.quantity.setStyleSheet(VALID_STYLE)
         #     if fix:
-        #         self.duration.setText(LogDb.format_duration(seconds))
+        #         self.quantity.setText(LogDb.format_duration(seconds))
 
     def value(self):
-        self._duration_edited()
-        seconds = LogDb.parse_duration(self.duration.text())
+        self._quantity_edited()
+        seconds = LogDb.parse_duration(self.quantity.text())
         if seconds is None:
             return seconds
         elif self.forward_box.isChecked():
@@ -651,10 +651,10 @@ class EntryEditor(widgets.QGroupBox):
         activity_label = widgets.QLabel("Activity:", self)
         activity_label.setBuddy(self.activity)
         self.link = widgets.QCheckBox("Link", self)
-        self.duration_field = widgets.QLineEdit(self)
-        self.duration_field.setFocusPolicy(Qt.StrongFocus)
-        duration_label = widgets.QLabel("Duration:", self)
-        duration_label.setBuddy(self.duration_field)
+        self.quantity_field = widgets.QLineEdit(self)
+        self.quantity_field.setFocusPolicy(Qt.StrongFocus)
+        quantity_label = widgets.QLabel("Duration:", self)
+        quantity_label.setBuddy(self.quantity_field)
         start_box = widgets.QGroupBox('Start:', self)
         self.start_date = widgets.QDateEdit(self)
         self.start_date.setCalendarPopup(True)
@@ -668,10 +668,10 @@ class EntryEditor(widgets.QGroupBox):
         end_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+E"), self)
         activity_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+A"), self)
         link_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+L"), self)
-        duration_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+D"), self)
+        quantity_shortcut = widgets.QShortcut(gui.QKeySequence("Alt+D"), self)
         # Tab Order
-        self.setTabOrder(self.activity, self.duration_field)
-        self.setTabOrder(self.duration_field, self.link)
+        self.setTabOrder(self.activity, self.quantity_field)
+        self.setTabOrder(self.quantity_field, self.link)
         self.setTabOrder(self.link, self.start)
         self.setTabOrder(self.start, self.end)
         # Layout
@@ -680,8 +680,8 @@ class EntryEditor(widgets.QGroupBox):
         top_row.addWidget(activity_label)
         top_row.addWidget(self.activity, 8)
         top_row.addStretch(1)
-        top_row.addWidget(duration_label)
-        top_row.addWidget(self.duration_field, 2)
+        top_row.addWidget(quantity_label)
+        top_row.addWidget(self.quantity_field, 2)
         top_row.addStretch(1)
         top_row.addWidget(self.link)
         main.addLayout(top_row)
@@ -703,19 +703,19 @@ class EntryEditor(widgets.QGroupBox):
         # Connections
         self.start_date.dateChanged.connect(self.calendar_changed)
         self.end_date.dateChanged.connect(self.calendar_changed)
-        self.duration_field.editingFinished.connect(self.duration_edited)
+        self.quantity_field.editingFinished.connect(self.quantity_edited)
         self.start.dateTimeChanged.connect(self.start_end_edited)
         self.end.dateTimeChanged.connect(self.start_end_edited)
         self.start.dateTimeChanged.connect(self.update_calendars)
         self.end.dateTimeChanged.connect(self.update_calendars)
-        self.duration_field.editingFinished.connect(self.changed)
+        self.quantity_field.editingFinished.connect(self.changed)
         self.start.dateTimeChanged.connect(self.changed)
         self.activity.editingFinished.connect(self.changed)
         self.end.dateTimeChanged.connect(self.changed)
         start_shortcut.activated.connect(self.start.setFocus)
         end_shortcut.activated.connect(self.end.setFocus)
         activity_shortcut.activated.connect(self.activity.setFocus)
-        duration_shortcut.activated.connect(self.duration_field.setFocus)
+        quantity_shortcut.activated.connect(self.quantity_field.setFocus)
         link_shortcut.activated.connect(self.link.toggle)
         # Setup
         self.update_completer()
@@ -748,9 +748,9 @@ class EntryEditor(widgets.QGroupBox):
         self.activity.setText(entry['activity'])
         self.start.setDateTime(entry['start'])
         span = (entry['end'] - entry['start']).total_seconds()
-        self.link.setChecked(abs(span - entry['duration']) < 0.01)
+        self.link.setChecked(abs(span - entry['quantity']) < 0.01)
         self.end.setDateTime(entry['end'])
-        self.duration_field.setText(LogDb.format_duration(entry['duration']))
+        self.quantity_field.setText(LogDb.format_duration(entry['quantity']))
         self.activity.setFocus()
 
     def reset(self, latest):
@@ -777,40 +777,38 @@ class EntryEditor(widgets.QGroupBox):
     def entry(self):
         if self.activity.hasFocus():
             self.activity.editingFinished.emit()
-        if self.duration_field.hasFocus():
-            self.duration_field.editingFinished.emit()
+        if self.quantity_field.hasFocus():
+            self.quantity_field.editingFinished.emit()
         activity = self.activity.text().strip()
         if activity == '':
             activity = None
         start = self.start.dateTime().toPyDateTime()
         end = self.end.dateTime().toPyDateTime()
         if abs((end - start).seconds - self.seconds) < 60:
-            duration = None
+            quantity = None
         else:
-            duration = LogDb.parse_duration(self.duration_field.text())
+            quantity = LogDb.parse_duration(self.quantity_field.text())
         entry = {
             'id': self._id,
             'activity': activity,
             'start': start,
             'end': end,
-            'duration': duration,
+            'quantity': quantity,
         }
         return entry
 
     def start_end_edited(self):
-        current_duration = LogDb.parse_duration(self.duration_field.text())
-        if current_duration is None:
-            current_duration = self.seconds
-        if (self.link.isChecked() or current_duration is None
-                or current_duration > self.start_end_seconds):
+        current_quantity = LogDb.parse_duration(self.quantity_field.text())
+        if current_quantity is None:
+            current_quantity = self.seconds
+        if (self.link.isChecked() or current_quantity is None
+                or current_quantity > self.start_end_seconds):
             self.seconds = self.start_end_seconds
         else:
-            self.seconds = current_duration
-        duration_text = LogDb.format_duration(self.seconds)
-        self.duration_field.setText(duration_text)
-
-    def duration_edited(self):
-        new = LogDb.parse_duration(self.duration_field.text())
+            self.seconds = current_quantity
+        quantity_text = LogDb.format_duration(self.seconds)
+        self.quantity_field.setText(quantity_text)
+    def quantity_edited(self):
         if new is None:
             if self.link.isChecked() or self.seconds is None:
                 new = self.start_end_seconds
@@ -820,7 +818,7 @@ class EntryEditor(widgets.QGroupBox):
             self.end.setDateTime(self.start.dateTime().toPyDateTime() +
                                  datetime.timedelta(seconds=new))
         self.seconds = new
-        self.duration_field.setText(LogDb.format_duration(new))
+        self.quantity_field.setText(LogDb.format_duration(new))
 
 
 class FilterPanel(widgets.QGroupBox):
