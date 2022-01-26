@@ -171,7 +171,7 @@ class Workspace(widgets.QWidget):
         self.setWindowTitle(APP_NAME)
         if filename is None:
             filename = ":memory:"
-        self._db = LogDb(filename, bounds=60, units='minutes')
+        self._db = LogDb(filename, bounds=60 * 60, units='seconds')
         # Widgets
         self.filter_panel = FilterPanel(self)
         self.list_panel = ListPanel(self._db, self)
