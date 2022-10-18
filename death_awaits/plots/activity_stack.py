@@ -163,8 +163,8 @@ class ActivityStack(PlotDialogBase):
         ] * len(midpoints)
         for i, label in enumerate(new_activities):
             kwparams = {
-                'left': midpoints,
-                'height': label[1],
+                # 'left': midpoints,
+                # 'height': label[1],
                 'width': chunk_size,
                 'bottom': base_values,
                 'color': colors[i],
@@ -173,7 +173,7 @@ class ActivityStack(PlotDialogBase):
                 'gid': label[0],
                 'picker': True,
             }
-            axes.bar(**kwparams)
+            axes.bar(midpoints, label[1], **kwparams)
             base_values = [sum((a, b)) for a, b in zip(base_values, label[1])]
         self._draw_legend(new_activities, figure, axes, colors)
 
