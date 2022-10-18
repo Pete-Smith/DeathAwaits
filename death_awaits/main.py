@@ -26,6 +26,7 @@ from death_awaits.helper import (
     configure_matplotlib,
 )
 from death_awaits.plots import PLOTTERS
+from death_awaits.palettes import get_application_palette
 
 ORG_NAME = "anagogical.net"
 APP_NAME = "Death Awaits"
@@ -302,6 +303,9 @@ class GraphPanel(widgets.QWidget):
     def refresh_plot(self):
         if DEBUG:
             sys.stderr.write('Updating graph...' + os.linesep)
+        if gui.QGuiApplication.queryKeyboardModifiers() == Qt.ControlModifier:
+            palette = get_application_palette()
+            palette._past_assignments = dict()
         self.figure.clf(keep_observers=True)
         i = self.type_box.currentIndex()
         plotter = self.plotters[i]
