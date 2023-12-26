@@ -9,10 +9,16 @@ from dateutil.relativedelta import relativedelta
 
 from death_awaits.db import LogDb
 from death_awaits.palettes import BasePalette
-from helper import (Weekday, SegmentSize, SortStrategy, OtherSort,
-                    UnrecordedSort, snap_to_segment)
+from helper import (
+    Weekday,
+    SegmentSize,
+    SortStrategy,
+    OtherSort,
+    UnrecordedSort,
+    snap_to_segment,
+)
 
-chunk = namedtuple('Chunk', ('name', 'proportion'))
+chunk = namedtuple("Chunk", ("name", "proportion"))
 
 
 class LinearQuantizedModel(Core.QAbstractItemModel):
@@ -58,30 +64,26 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
 
     @property
     def start(self):
-        return getattr(self, '_start', None)
+        return getattr(self, "_start", None)
 
     @start.setter
     def start(self, value):
-        value = snap_to_segment(value, self.segment_size,
-                                self.first_day_of_week)
+        value = snap_to_segment(value, self.segment_size, self.first_day_of_week)
         if self.end and value > self.end:
-            raise ValueError(
-                "Tried to set a start time after current end time.")
-        setattr(self, '_start', value)
+            raise ValueError("Tried to set a start time after current end time.")
+        setattr(self, "_start", value)
         self._cache = None
 
     @property
     def end(self):
-        return getattr(self, '_end', None)
+        return getattr(self, "_end", None)
 
     @end.setter
     def end(self, value):
-        value = snap_to_segment(value, self.segment_size,
-                                self.first_day_of_week)
+        value = snap_to_segment(value, self.segment_size, self.first_day_of_week)
         if self.start and value < self.start:
-            raise ValueError(
-                "Tried to set a end time before current start time.")
-        setattr(self, '_end', value)
+            raise ValueError("Tried to set a end time before current start time.")
+        setattr(self, "_end", value)
         self._cache = None
 
     def segment_size_in_seconds(self):
@@ -94,28 +96,26 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
         elif self.segment_size == SegmentSize.week:
             return 7 * 24 * 60 * 60
         elif self.segment_size == SegmentSize.month:
-            raise AttributeError(
-                'There are a variable number of days per month.')
+            raise AttributeError("There are a variable number of days per month.")
         else:
-            raise ValueError(
-                f'Invalid segment_size attribute: f{self.segment_size}')
+            raise ValueError(f"Invalid segment_size attribute: f{self.segment_size}")
 
     def update_ranked_activities(self):
         category_count = len(self.palette)
-        show_unrecorded = (self.sort_unrecorded !=
-                           UnrecordedSort.hide_unrecorded)
+        show_unrecorded = self.sort_unrecorded != UnrecordedSort.hide_unrecorded
         show_other = self.sort_other != OtherSort.hide_other
-        activities = self.database.slice_activities(start=self.start,
-                                                    end=self.end,
-                                                    level=self.level,
-                                                    unrecorded=show_unrecorded)
+        activities = self.database.slice_activities(
+            start=self.start, end=self.end, level=self.level, unrecorded=show_unrecorded
+        )
         items_shown = list()
         other = list()
         filter_ = re.compile(self.activity, re.IGNORECASE)
         for k, v in activities.items():
             m = filter_.search(k)
             if m:
-                items_shown.append((k, v), )
+                items_shown.append(
+                    (k, v),
+                )
             elif show_other:
                 other.append(v)
         if len(items_shown) > category_count:
@@ -125,26 +125,28 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
                     other.append(item[1])
             items_shown = items_shown[:category_count]
         if other and show_other:
-            items_shown.append(('other', sum(other)))
-        if self.sort_strategy in (SortStrategy.largest_first,
-                                  SortStrategy.largest_first_by_segment):
+            items_shown.append(("other", sum(other)))
+        if self.sort_strategy in (
+            SortStrategy.largest_first,
+            SortStrategy.largest_first_by_segment,
+        ):
             items_shown.sort(key=lambda i: i[1], reverse=True)
         else:
             items_shown.sort(key=lambda i: i[1], reverse=False)
         ranked_activities = [i[0] for i in items_shown]
         if self.sort_other == OtherSort.after_activities:
             try:
-                i = ranked_activities.index('other')
+                i = ranked_activities.index("other")
                 del ranked_activities[i]
                 ranked_activities.pop(i)
-                ranked_activities.append('other')
+                ranked_activities.append("other")
             except ValueError:
                 pass
         elif self.sort_other == OtherSort.before_activities:
             try:
-                i = ranked_activities.index('other')
+                i = ranked_activities.index("other")
                 del ranked_activities[i]
-                ranked_activities.insert(0, 'other')
+                ranked_activities.insert(0, "other")
             except ValueError:
                 pass
         if self.sort_unrecorded == UnrecordedSort.before_other:
@@ -177,9 +179,11 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
             ] * self.rowCount()
         if self.segment_size != SegmentSize.month:
             segment_start = self.start + datetime.timedelta(
-                seconds=self.segment_size_in_seconds() * index.row())
+                seconds=self.segment_size_in_seconds() * index.row()
+            )
             segment_end = segment_start + datetime.timedelta(
-                seconds=self.segment_size_in_seconds())
+                seconds=self.segment_size_in_seconds()
+            )
             # TODO
         else:
             pass
@@ -189,7 +193,6 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
 
 
 class CyclicalQuantizedModel(LinearQuantizedModel):
-
     def rowCount(self, parent=None):
         pass
 
