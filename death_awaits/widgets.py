@@ -1,9 +1,8 @@
-import PyQt5.QtCore as core
-import PyQt5.QtWidgets as widgets
+import PyQt6.QtCore as core
+import PyQt6.QtWidgets as widgets
 
 
 class DayRangeSelector(widgets.QWidget):
-
     def __init__(self, show_sample=True, parent=None):
         super(DayRangeSelector, self).__init__(show_sample, parent)
         # Widgets
@@ -44,14 +43,14 @@ class DayRangeSelector(widgets.QWidget):
 
 
 class WeekdaySelector(widgets.QWidget):
-
     def __init__(self, initial_state=None, parent=None):
         super(WeekdaySelector, self).__init__(parent)
         self._days = []
         layout = widgets.QHBoxLayout()
         self.setLayout(layout)
         for i in range(1, 8):
-            day_name = core.QDate.shortDayName(i)
+            day_name = core.QLocale().dayName(i, core.QLocale.FormatType.ShortFormat)
+            # day_name = core.QDate.shortDayName(i)
             day = widgets.QCheckBox(day_name, self)
             layout.addWidget(day)
             if initial_state is None or i in initial_state:
@@ -66,18 +65,17 @@ class WeekdaySelector(widgets.QWidget):
         for i, num in enumerate(days):
             if i > 0 and i < len(days) - 1:
                 if days[i - 1] + 1 == num and days[i + 1] - 1 == num:
-                    if len(result) and result[-1] != '-':
-                        result += '-'
+                    if len(result) and result[-1] != "-":
+                        result += "-"
                     continue
-                elif len(result) and result[-1] != '-':
-                    result += ', '
-            result += core.QDate.shortDayName(num)
+                elif len(result) and result[-1] != "-":
+                    result += ", "
+            result += core.QLocale().dayName(num, core.QLocale.FormatType.ShortFormat)
+            # result += core.QDate.shortDayName(num)
         return result
 
     def selection(self):
-        result = [
-            n + 1 for n in range(len(self._days)) if self._days[n].isChecked()
-        ]
+        result = [n + 1 for n in range(len(self._days)) if self._days[n].isChecked()]
         if len(result) == 0:
             return list(range(1, 8))
         return result

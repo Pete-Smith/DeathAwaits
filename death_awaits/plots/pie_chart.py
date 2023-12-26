@@ -1,7 +1,7 @@
 import re
 
-import PyQt5.QtGui as gui
-import PyQt5.QtWidgets as widgets
+import PyQt6.QtGui as gui
+import PyQt6.QtWidgets as widgets
 
 from death_awaits.palettes import get_application_palette
 from death_awaits.plots.base import PlotDialogBase

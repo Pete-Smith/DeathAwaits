@@ -3,8 +3,8 @@ import datetime
 import re
 from copy import copy
 
-import PyQt5.QtCore as Core
-from PyQt5.QtCore import Qt
+import PyQt6.QtCore as core
+from PyQt6.QtCore import Qt
 from dateutil.relativedelta import relativedelta
 
 from death_awaits.db import LogDb
@@ -21,7 +21,7 @@ from helper import (
 chunk = namedtuple("Chunk", ("name", "proportion"))
 
 
-class LinearQuantizedModel(Core.QAbstractItemModel):
+class LinearQuantizedModel(core.QAbstractItemModel):
     """
     This model will digest the contents of a LogDb into a series of
     quantized segments. Each segment will contain zero or more activities.
@@ -172,7 +172,7 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
     def columnCount(self, parent=None):
         return len(self._ranked_activities)
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if self._cache is None:
             self._cache = [
                 None,
@@ -188,7 +188,7 @@ class LinearQuantizedModel(Core.QAbstractItemModel):
         else:
             pass
 
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
+    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
         pass
 
 

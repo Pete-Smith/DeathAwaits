@@ -13,7 +13,7 @@ from __future__ import unicode_literals
 import sys
 import os
 import random
-from PyQt5 import QtGui, QtCore
+from PyQt6 import QtGui, QtCore
 
 from numpy import arange, sin, pi
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as Canvas
@@ -38,8 +38,9 @@ class MyMplCanvas(Canvas):
         Canvas.__init__(self, fig)
         self.setParent(parent)
 
-        Canvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,
-                             QtGui.QSizePolicy.Expanding)
+        Canvas.setSizePolicy(
+            self, QtGui.QSizePolicy.Policy.Expanding, QtGui.QSizePolicy.Policy.Expanding
+        )
         Canvas.updateGeometry(self)
 
     def compute_initial_figure(self):
@@ -61,37 +62,36 @@ class MyDynamicMplCanvas(MyMplCanvas):
     def __init__(self, *args, **kwargs):
         MyMplCanvas.__init__(self, *args, **kwargs)
         timer = QtCore.QTimer(self)
-        QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"),
-                               self.update_figure)
+        QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.update_figure)
         timer.start(1000)
 
     def compute_initial_figure(self):
-        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], "r")
 
     def update_figure(self):
         # Build a list of 4 random integers between 0 and 10 (both inclusive)
         test = [random.randint(0, 10) for i in range(4)]
-        self.axes.plot([0, 1, 2, 3], test, 'r')
+        self.axes.plot([0, 1, 2, 3], test, "r")
         self.draw()
 
 
 class ApplicationWindow(QtGui.QMainWindow):
-
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setWindowTitle("application main window")
 
-        self.file_menu = QtGui.QMenu('&File', self)
-        self.file_menu.addAction('&Quit', self.fileQuit,
-                                 QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
+        self.file_menu = QtGui.QMenu("&File", self)
+        self.file_menu.addAction(
+            "&Quit", self.fileQuit, QtCore.Qt.Modifier.CTRL + QtCore.Qt.Key.Key_Q
+        )
         self.menuBar().addMenu(self.file_menu)
 
-        self.help_menu = QtGui.QMenu('&Help', self)
+        self.help_menu = QtGui.QMenu("&Help", self)
         self.menuBar().addSeparator()
         self.menuBar().addMenu(self.help_menu)
 
-        self.help_menu.addAction('&About', self.about)
+        self.help_menu.addAction("&About", self.about)
 
         self.main_widget = QtGui.QWidget(self)
 
@@ -114,14 +114,17 @@ class ApplicationWindow(QtGui.QMainWindow):
 
     def about(self):
         QtGui.QMessageBox.about(
-            self, "About", """embedding_in_qt4.py example
+            self,
+            "About",
+            """embedding_in_qt4.py example
 Copyright 2005 Florent Rougon, 2006 Darren Dale
 
 This program is a simple example of a Qt4 application embedding matplotlib
 canvases.
 
 It may be used and modified with no restriction; raw copies as well as
-modified versions may be distributed without limitation.""")
+modified versions may be distributed without limitation.""",
+        )
 
 
 qApp = QtGui.QApplication(sys.argv)
