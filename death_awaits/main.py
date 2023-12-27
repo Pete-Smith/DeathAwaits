@@ -554,7 +554,7 @@ class ListPanel(widgets.QWidget):
             if min_time is None or min_time > entry["start"]:
                 min_time = entry["start"]
             if max_time is None or max_time < entry["end"]:
-                max_time = entry["end"]Graph
+                max_time = entry["end"]
                 latest_row = row
         if None not in (latest_row, min_time, max_time):
             self.editor.reset(max_time)
