@@ -28,6 +28,7 @@ class SegmentSize(Enum):
     day = 2
     week = 3
     month = 4
+    year = 5
 
 
 class SortStrategy(Enum):

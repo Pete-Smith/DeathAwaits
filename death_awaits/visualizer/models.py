@@ -21,12 +21,11 @@ from helper import (
 chunk = namedtuple("Chunk", ("name", "proportion"))
 
 
-class LinearQuantizedModel(core.QAbstractItemModel):
+class LinearModel(core.QAbstractItemModel):
     """
-    This model will digest the contents of a LogDb into a series of
-    quantized segments. Each segment will contain zero or more activities.
-    For a given model index,
-    the row is the segment offset from the beginning of the series,
+    This model will digest the contents of a LogDb into a series of segments.
+    Each segment will contain zero or more activities.
+    For a given model index, the row is the segment offset from the beginning of the series,
     and the column index is an activity.
     """
 
@@ -45,7 +44,7 @@ class LinearQuantizedModel(core.QAbstractItemModel):
         first_day_of_week: Weekday,
         parent=None,
     ):
-        super(LinearQuantizedModel, self).__init__(parent=parent)
+        super(LinearModel, self).__init__(parent=parent)
         self.database = database
         self.activity = activity
         self.start = start
@@ -97,6 +96,8 @@ class LinearQuantizedModel(core.QAbstractItemModel):
             return 7 * 24 * 60 * 60
         elif self.segment_size == SegmentSize.month:
             raise AttributeError("There are a variable number of days per month.")
+        elif self.segment_size == SegmentSize.year:
+            return 365 * 24 * 60 * 60
         else:
             raise ValueError(f"Invalid segment_size attribute: f{self.segment_size}")
 
@@ -192,7 +193,7 @@ class LinearQuantizedModel(core.QAbstractItemModel):
         pass
 
 
-class CyclicalQuantizedModel(LinearQuantizedModel):
+class CyclicModel(LinearModel):
     def rowCount(self, parent=None):
         pass
 
