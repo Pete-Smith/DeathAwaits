@@ -208,7 +208,7 @@ class LogDb(core.QObject):
         return result is not None
 
     @staticmethod
-    def contains_weekday(start, end, day) -> bool:
+    def contains_weekday(start: str, end: str, day: int) -> bool:
         """
         SQLite registered function takes two ISO datetimes and a weekday
         integer.
@@ -701,11 +701,6 @@ class LogDb(core.QObject):
             output.update({"unrecorded": amount})
         return output
 
-    def stacked_slice(
-        self, start, end, stack: Stack, level=None, unrecorded=True, activity=None
-    ):
-        pass
-
     def span_slices(
         self,
         start,
@@ -918,7 +913,7 @@ class LogDb(core.QObject):
         return seconds
 
     @staticmethod
-    def parse_duration(raw):
+    def parse_duration(raw: str) -> float:
         """
         Return the number of seconds a duration string represents,
         or None if there is an error parsing it.
