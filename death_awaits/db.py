@@ -4,18 +4,40 @@ import datetime
 import re
 from collections import OrderedDict
 import copy
+from enum import Enum
 
 import dateutil
-import PyQt6.QtGui as gui
-import PyQt6.QtWidgets as widgets
 import PyQt6.QtCore as core
-from PyQt6.QtCore import Qt
 
-from .helper import iso_to_gregorian, stringify_datetime
+from death_awaits.helper import iso_to_gregorian
 
 
 class SchemaMismatch(Exception):
     pass
+
+
+class SliceStep(Enum):
+    """
+    Slice steps move the wall clock.
+    So the periods of time each slice represents may vary across
+    daylight savings time boundaries, etc.
+    """
+
+    one_minute = 0
+    five_minutes = 1
+    quarter_hour = 2
+    half_hour = 3
+    hour = 4
+    day = 5
+    week = 6
+    month = 7
+    year = 8
+
+
+class Stack(Enum):
+    hourly = 0
+    daily = 1
+    weekly = 2
 
 
 class LogDb(core.QObject):
@@ -24,6 +46,7 @@ class LogDb(core.QObject):
     log_table_def = (
         ("id", "integer PRIMARY KEY"),
         ("activity", "text"),
+        # TODO: Default adapters are deprecated in the sqlite3 module.
         ("start", "timestamp"),
         ("end", "timestamp"),
         ("quantity", "int"),  # minutes as default
@@ -88,7 +111,7 @@ class LogDb(core.QObject):
                 if self.schema_version != row[2]:
                     raise SchemaMismatch(
                         f"Expected schema version {self.schema_version} "
-                        f"found schema vesion {row[2]}."
+                        f"found schema version {row[2]}."
                     )
             except sqlite3.OperationalError as e:
                 if str(e).lower() == "no such table: settings":
@@ -174,7 +197,7 @@ class LogDb(core.QObject):
             return datetime.timedelta(minutes=quantity)
 
     @staticmethod
-    def regexp(expr, item):
+    def regexp(expr: str, item: str) -> bool:
         """
         http://stackoverflow.com/questions/5365451/problem-with-regexp-python-and-sqlite
         """
@@ -185,7 +208,7 @@ class LogDb(core.QObject):
         return result is not None
 
     @staticmethod
-    def contains_weekday(start, end, day):
+    def contains_weekday(start, end, day) -> bool:
         """
         SQLite registered function takes two ISO datetimes and a weekday
         integer.
@@ -350,7 +373,9 @@ class LogDb(core.QObject):
             self.create_entry(**row)
 
     @staticmethod
-    def _row_density(quantity, start, end):
+    def _row_density(
+        quantity: int, start: datetime.datetime, end: datetime.datetime
+    ) -> float:
         assert isinstance(start, datetime.datetime)
         assert isinstance(end, datetime.datetime)
         span = float((start - end).total_seconds()) / 60 / 60
@@ -676,57 +701,62 @@ class LogDb(core.QObject):
             output.update({"unrecorded": amount})
         return output
 
+    def stacked_slice(
+        self, start, end, stack: Stack, level=None, unrecorded=True, activity=None
+    ):
+        pass
+
     def span_slices(
         self,
         start,
         span=datetime.timedelta(days=1),
-        chunk_size=datetime.timedelta(minutes=15),
+        slice_size=datetime.timedelta(minutes=15),
         level=None,
         unrecorded=None,
     ):
         """
-        Return a list of chunk midpoints,
-        and a dictionary whose keys are activity names and whose values are
-        proportions.
+        Return a list of slice midpoints as datetime instances,
+        and a dictionary whose keys are activity names and whose values
+        lists of proportions, with the same length as the number of slices.
         """
         if isinstance(span, (float, int)):
             span = self._quantity_to_timedelta(span)
-        if isinstance(chunk_size, (float, int)):
-            chunk_size = self._quantity_to_timedelta(chunk_size)
-        if isinstance(chunk_size, datetime.timedelta):
-            chunk_size = chunk_size.total_seconds()
+        if isinstance(slice_size, (float, int)):
+            slice_size = self._quantity_to_timedelta(slice_size)
+        if isinstance(slice_size, datetime.timedelta):
+            slice_size = slice_size.total_seconds()
         if isinstance(span, datetime.timedelta):
             span = span.total_seconds()
-        if span % chunk_size:
-            chunk_size = span / round(span / float(chunk_size))
+        if span % slice_size:
+            slice_size = span / round(span / float(slice_size))
         if not isinstance(start, datetime.datetime) and isinstance(
             start, datetime.date
         ):
             start = datetime.datetime(start.year, start.month, start.day, 0, 0, 0)
-        chunks_in_span = int(span / chunk_size)
-        chunk_midpoints = []
+        slices_in_span = int(span / slice_size)
+        slice_midpoints = []
         activity_series = {}
-        for i in range(chunks_in_span):
-            chunk_start = start + datetime.timedelta(seconds=(i * chunk_size))
-            chunk_midpoint = chunk_start + datetime.timedelta(seconds=chunk_size / 2.0)
-            chunk_midpoints.append(chunk_midpoint)
-            chunk_end = chunk_start + datetime.timedelta(seconds=chunk_size)
+        for i in range(slices_in_span):
+            slice_start = start + datetime.timedelta(seconds=(i * slice_size))
+            slice_midpoint = slice_start + datetime.timedelta(seconds=slice_size / 2.0)
+            slice_midpoints.append(slice_midpoint)
+            slice_end = slice_start + datetime.timedelta(seconds=slice_size)
             activities = self.slice_activities(
-                chunk_start, chunk_end, level, unrecorded
+                slice_start, slice_end, level, unrecorded
             )
             for k, v in activities.items():
                 if k not in activity_series.keys():
                     activity_series[k] = [
                         0,
-                    ] * chunks_in_span
+                    ] * slices_in_span
                 activity_series[k][i] = v
-        return chunk_midpoints, activity_series
+        return slice_midpoints, activity_series
 
     def stacked_slices(
         self,
         start,
         span=datetime.timedelta(days=1),
-        chunk_size=datetime.timedelta(minutes=15),
+        slice_size=datetime.timedelta(minutes=15),
         level=None,
         unrecorded=None,
         weekdays=None,
@@ -783,7 +813,7 @@ class LogDb(core.QObject):
             current_midpoints, current_activities = self.span_slices(
                 current,
                 step,
-                chunk_size,
+                slice_size,
                 level,
                 unrecorded=True,
             )
@@ -1055,148 +1085,3 @@ class LogDb(core.QObject):
 
     def redo_possible(self):
         return bool(self._redo_stack)
-
-
-class LogModel(core.QAbstractTableModel):
-    """In-memory data store."""
-
-    def __init__(self, database, activity=None, start=None, end=None, parent=None):
-        super(LogModel, self).__init__(parent)
-        assert isinstance(database, LogDb)
-        self._db = database
-        self._cache = []
-        self.update_cache(activity=None, start=None, end=None)
-        # Connections
-        self._db.entry_added.connect(self._handle_addition)
-        self._db.entry_modified.connect(self._handle_modification)
-        self._db.entry_removed.connect(self._handle_deletion)
-
-    def update_cache(self, activity=None, start=None, end=None):
-        if isinstance(activity, str) and activity.strip() == "":
-            activity = None
-        self.beginResetModel()
-        self._cache = self._db.filter(activity, start, end)
-        self._current_filter = (activity, start, end)
-        self.endResetModel()
-
-    def rowCount(self, parent=None):
-        return len(self._cache)
-
-    def columnCount(self, parent=None):
-        return len(LogDb.log_table_def)
-
-    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
-        if not index.isValid():
-            return None
-        column_name = LogDb.log_table_def[index.column()][0]
-        if role == Qt.ItemDataRole.DisplayRole:
-            data = self._cache[index.row()][column_name]
-            if isinstance(data, datetime.datetime):
-                data = stringify_datetime(data)
-            elif column_name == "quantity":
-                data = LogDb.format_duration(data)
-            return data
-        elif role == Qt.ItemDataRole.UserRole:
-            return self._cache[index.row()]
-        elif role == Qt.ItemDataRole.BackgroundRole:
-            if index.row() % 2:
-                return gui.QBrush(
-                    widgets.QApplication.instance()
-                    .palette()
-                    .color(gui.QPalette.ColorRole.AlternateBase)
-                )
-            else:
-                return gui.QBrush(
-                    widgets.QApplication.instance().palette().color(gui.QPalette.ColorRole.Base)
-                )
-
-    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
-        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
-            return LogDb.log_table_def[section][0].title()
-
-    def create_entry(
-        self, activity, start, end, quantity=None, id=None, apply_capitalization=False
-    ):
-        """Create an entry and return the new id."""
-        return self._db.create_entry(
-            activity, start, end, quantity, id, apply_capitalization
-        )
-
-    def delete_entry(self, id_):
-        self._db.remove_entry(id_)
-
-    def adjust_entries(self, ids, amount):
-        self._db.shift_rows(ids, amount)
-
-    def _handle_deletion(self, id_):
-        for r in range(self.rowCount()):
-            entry = self.data(self.index(r, 0), Qt.ItemDataRole.UserRole)
-            if entry is not None and entry["id"] == id_:
-                self.beginRemoveRows(core.QModelIndex(), r, r)
-                del self._cache[r]
-                self.endRemoveRows()
-                break
-
-    def _handle_addition(self, id_):
-        row = self._db.row(id_)
-        if self._fits_filter(row):
-            for i, current in enumerate(self._cache):
-                if current["start"] > row["start"]:
-                    self.beginInsertRows(core.QModelIndex(), i, i)
-                    self._cache.insert(i, row)
-                    self.endInsertRows()
-                    break
-            else:
-                i = len(self._cache)
-                self.beginInsertRows(core.QModelIndex(), i, i)
-                self._cache.append(row)
-                self.endInsertRows()
-
-    def _handle_modification(self, id_):
-        row = self._db.row(id_)
-        if self._fits_filter(row):
-            for i, current in enumerate(self._cache):
-                if current["id"] == row["id"]:
-                    self._cache[i] = row
-                    left_index = self.index(i, 0)
-                    right_index = self.index(i, self.columnCount() - 1)
-                    self.dataChanged.emit(left_index, right_index)
-                    break
-
-    def _fits_filter(self, entry):
-        """Check entry parameter against the current filter."""
-        time_ok, activity_ok = False, False
-        activity, start, end = self._current_filter
-        if None not in (start, end):
-            try:
-                if (
-                    start <= entry["start"] <= end
-                    or start <= entry["end"] <= end
-                    or (entry["start"] <= start and entry["end"] >= end)
-                ):
-                    time_ok = True
-            except TypeError:
-                print(
-                    "start : {0}, end : {1},"
-                    "\nentry['start'] : {2}, entry['end'] : {3}".format(
-                        repr(start),
-                        repr(end),
-                        repr(entry["start"]),
-                        repr(entry["end"]),
-                    )
-                )
-                raise
-        elif end is not None and isinstance(start, datetime.datetime):
-            if entry["start"] <= end:
-                time_ok = True
-        elif start is not None and isinstance(end, datetime.datetime):
-            if entry["end"] >= start:
-                time_ok = True
-        else:
-            time_ok = True
-        if activity is None:
-            activity_ok = True
-        else:
-            reg = re.compile(activity, re.IGNORECASE)
-            activity_ok = reg.search(entry["activity"]) is not None
-        return time_ok and activity_ok

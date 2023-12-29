@@ -103,26 +103,26 @@ class ActivityStack(PlotDialogBase):
     def _plot(self, figure, database, activity, start, end):
         axes = figure.add_subplot(111)
         start, end = self.bracket(database, "", start, end)
-        chunk_size = LogDb.parse_duration(self.sample_field.text())
+        slice_size = LogDb.parse_duration(self.sample_field.text())
         level = self.level.value()
         ranked_activities = self.ranked_activities(database, activity, start, end)
         allowed_activities = [n[0] for n in ranked_activities]
         midpoints, activities = database.span_slices(
             start=start,
             span=end - start,
-            chunk_size=chunk_size,
+            slice_size=slice_size,
             level=level,
             unrecorded=False,
         )
-        # Mutate chunk_size so it's understandable by matplotlib
-        chunk_size = chunk_size / datetime.timedelta(days=1).total_seconds()
+        # Mutate slice_size so it's understandable by matplotlib
+        slice_size = slice_size / datetime.timedelta(days=1).total_seconds()
         self._graph_data(
             activities,
             figure,
             axes,
             allowed_activities,
             midpoints,
-            chunk_size,
+            slice_size,
             activity,
         )
         axes.xaxis.set_ticks(
@@ -143,7 +143,7 @@ class ActivityStack(PlotDialogBase):
         axes,
         allowed_activities,
         midpoints,
-        chunk_size,
+        slice_size,
         activity,
     ):
         """
@@ -180,7 +180,7 @@ class ActivityStack(PlotDialogBase):
             kwparams = {
                 # 'left': midpoints,
                 # 'height': label[1],
-                "width": chunk_size,
+                "width": slice_size,
                 "bottom": base_values,
                 "color": colors[i],
                 "linewidth": 0,
@@ -238,14 +238,14 @@ class ActivityStackDay(ActivityStack):
             weekdays = self.weekday_selector.selection()
         axes = figure.add_subplot(111, xmargin=0, ymargin=0)
         start, end = self.bracket(database, "", start, end)
-        chunk_size = LogDb.parse_duration(self.sample_field.text())
+        slice_size = LogDb.parse_duration(self.sample_field.text())
         level = self.level.value()
         ranked_activities = self.ranked_activities(database, activity, start, end)
         allowed_activities = [n[0] for n in ranked_activities]
         midpoints, activities = database.stacked_slices(
             start=start,
             span=end - start,
-            chunk_size=chunk_size,
+            slice_size=slice_size,
             level=level,
             unrecorded=False,
             weekdays=weekdays,
@@ -257,7 +257,7 @@ class ActivityStackDay(ActivityStack):
             axes,
             allowed_activities,
             midpoints,
-            chunk_size,
+            slice_size,
             activity,
         )
         if weekly:
@@ -276,7 +276,10 @@ class ActivityStackDay(ActivityStack):
                 )
             )
             axes.xaxis.set_ticklabels(
-                [core.QLocale().dayName(n, core.QLocale.FormatType.ShortFormat) for n in range(1, 8)]
+                [
+                    core.QLocale().dayName(n, core.QLocale.FormatType.ShortFormat)
+                    for n in range(1, 8)
+                ]
                 # [core.QDate.shortDayName(n) for n in range(1, 8)]
                 # ('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')
             )
