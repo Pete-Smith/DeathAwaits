@@ -4,10 +4,11 @@ import datetime
 import re
 from collections import OrderedDict
 import copy
-from enum import Enum
+from typing import Optional
 
 import dateutil
-import PyQt6.QtCore as core
+
+# import PyQt6.QtCore as core
 
 from death_awaits.helper import iso_to_gregorian
 
@@ -16,31 +17,7 @@ class SchemaMismatch(Exception):
     pass
 
 
-class SliceStep(Enum):
-    """
-    Slice steps move the wall clock.
-    So the periods of time each slice represents may vary across
-    daylight savings time boundaries, etc.
-    """
-
-    one_minute = 0
-    five_minutes = 1
-    quarter_hour = 2
-    half_hour = 3
-    hour = 4
-    day = 5
-    week = 6
-    month = 7
-    year = 8
-
-
-class Stack(Enum):
-    hourly = 0
-    daily = 1
-    weekly = 2
-
-
-class LogDb(core.QObject):
+class LogDb:
     """On-disk data store."""
 
     log_table_def = (
@@ -53,19 +30,36 @@ class LogDb(core.QObject):
     )
     settings_table_def = (
         ("id", "integer PRIMARY KEY"),
-        ("bounds", "integer"),  # time slices are clamped to qty/hour
         ("units", "text"),
+        ("overflow", "bool"),  # Allow overloaded time spans.
+        ("timezone", "text"),  # IANA time zone name
         ("schema_version", "integer"),
     )
-    entry_added = core.pyqtSignal(int)
-    entry_modified = core.pyqtSignal(int)
-    entry_removed = core.pyqtSignal(int)
-    schema_version = 2
+    # entry_added = core.pyqtSignal(int)
+    # entry_modified = core.pyqtSignal(int)
+    # entry_removed = core.pyqtSignal(int)
+    schema_version = 3
 
     def __init__(
-        self, filename: str = None, bounds: int = None, units: str = None, parent=None
+        self,
+        filename: str,
+        units: Optional[str] = None,
+        overflow: Optional[bool] = None,
+        storage_timezone: Optional[str] = None,
+        ui_timezone: Optional[str] = None,
     ):
-        super(LogDb, self).__init__(parent)
+        """
+        Open or initialize a Death Awaits Time Series Database.
+
+        The following are initialization parameters and are not expected to be
+        passed when opening an existing file: units, overflow, and storage_timezone.
+        These are set once when creating a file, and can not be changed retroactively.
+
+        The storage_timezone will default to UTC, if not specified.
+        The user-facing timezone will default to US/Eastern, if not specified.
+        The user-facing timezone can be updated at any time.
+        """
+        self.set_timezone(ui_timezone or "US/Eastern")
         self._undo_stack = list()
         self._redo_stack = list()
         self._current_action = None
@@ -79,25 +73,39 @@ class LogDb(core.QObject):
         self.connection.create_function("REGEXP", 2, LogDb.regexp)
         self.connection.create_function("contains_weekday", 3, LogDb.contains_weekday)
         if new_file:
-            if None in (bounds, units):
+            if None in (units, overflow):
                 raise ValueError(
-                    "The bounds and units parameters need "
+                    "The units and overflow parameters need "
                     "to be set to create a new database."
+                )
+            if (
+                not (
+                    units.lower().startswith("second")
+                    or units.lower().startswith("minute")
+                    or units.lower().startswith("hour")
+                    or units.lower().startswith("day")
+                )
+                and overflow == True
+            ):
+                raise ValueError(
+                    "Overflow behavior will only work with the following units: days, hours, minutes, seconds."
                 )
             cursor = self.connection.cursor()
             try:
                 self._create_activitylog_table(cursor)
-                self._create_settings_table(cursor, bounds, units)
+                self._create_settings_table(cursor, units, overflow, storage_timezone)
             finally:
                 cursor.close()
                 self.connection.commit()
-            self.bounds = bounds
             self.units = units
+            self.overflow = overflow
         else:  # if new_file == False
             self._check_quantity_column()
             cursor = self.connection.cursor()
             try:
-                cursor.execute("SELECT bounds, units, schema_version FROM settings")
+                cursor.execute(
+                    "SELECT units, overflow, timezone, schema_version FROM settings"
+                )
                 row = cursor.fetchone()
                 self.bounds = row[0]
                 self.units = row[1]
@@ -135,15 +143,16 @@ class LogDb(core.QObject):
         cursor.execute("CREATE INDEX start_times ON activitylog (start)")
         cursor.execute("CREATE INDEX end_times ON activitylog (end)")
 
-    def _create_settings_table(self, cursor, bounds, units):
+    def _create_settings_table(self, cursor, units, overflow, storage_timezone):
         cursor.execute(
             "CREATE TABLE settings ("
             + (", ".join(["{0} {1}".format(k, t) for k, t in LogDb.settings_table_def]))
             + ")"
         )
         cursor.execute(
-            "INSERT INTO settings (bounds, units, schema_version)" " VALUES (?, ?, ?)",
-            (bounds, units, self.schema_version),
+            "INSERT INTO settings (units, overflow, storage_timezone, schema_version)"
+            " VALUES (?, ?, ?)",
+            (units, overflow, storage_timezone, self.schema_version),
         )
 
     def _check_quantity_column(self):
@@ -195,6 +204,12 @@ class LogDb(core.QObject):
             return datetime.timedelta(hours=quantity * 24)
         else:
             return datetime.timedelta(minutes=quantity)
+
+    def set_timezone(self, timezone: str):
+        """Set the user-facing timezone."""
+        self._ui_tz = dateutil.tz.gettz(timezone)
+        if self._ui_tz is None:
+            raise ValueError(f"Not a valid IANA Time Zone Name : {timezone}")
 
     @staticmethod
     def regexp(expr: str, item: str) -> bool:
