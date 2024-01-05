@@ -1,16 +1,52 @@
-import os
-import sqlite3
-import datetime
-import re
 from collections import OrderedDict
+from datetime import datetime, timedelta
+from typing import Optional, Callable
 import copy
-from typing import Optional
+import os
+import re
+import sqlite3
 
-import dateutil
+from dateutil import tz, parser
 
 # import PyQt6.QtCore as core
 
 from death_awaits.helper import iso_to_gregorian
+
+
+def _datetime_adapter_factory(
+    ui_timezone: Optional[str], storage_timezone: Optional[str]
+) -> Callable[datetime]:
+    """
+    SQLite database adapter factory for datetime objects.
+
+    The returned function will transform Python datetime objects
+    into byte strings for storage.
+    During this transformation, the function handles the timezone conversion
+    from the UI timezone to the storage timezone.
+
+    The ui_timezone parameter will default to the local timezone.
+    The storage_timezone parameter will default to UTC.
+    """
+    if ui_timezone is None:
+        pass
+    pass
+
+
+def _datetime_converter_factory(
+    ui_timezone: Optional[str], storage_timezone: Optional[str]
+) -> Callable[bytes]:
+    """
+    SQLite database converter factory for datetime objects.
+
+    The returned function will transform byte strings to
+    Python datetime objects for use in the application.
+    During this transformation, the function handles the timezone conversion
+    from the storage timezone to the UI timezone.
+
+    The ui_timezone parameter will default to the local timezone.
+    The storage_timezone parameter will default to UTC.
+    """
+    pass
 
 
 class SchemaMismatch(Exception):
@@ -75,8 +111,7 @@ class LogDb:
         if new_file:
             if None in (units, overflow):
                 raise ValueError(
-                    "The units and overflow parameters need "
-                    "to be set to create a new database."
+                    "The units and overflow parameters need to be set to create a new database."
                 )
             if (
                 not (
@@ -88,7 +123,8 @@ class LogDb:
                 and overflow == True
             ):
                 raise ValueError(
-                    "Overflow behavior will only work with the following units: days, hours, minutes, seconds."
+                    "Overflow behavior will only work with the following units: "
+                    "days, hours, minutes, seconds."
                 )
             cursor = self.connection.cursor()
             try:
@@ -123,7 +159,7 @@ class LogDb:
                     )
             except sqlite3.OperationalError as e:
                 if str(e).lower() == "no such table: settings":
-                    self._create_settings_table(cursor, bounds, units)
+                    self._create_settings_table(cursor, units)
                     self.bounds = bounds
                     self.units = units
                 else:
@@ -181,33 +217,33 @@ class LogDb:
             cursor.close()
             self.connection.commit()
 
-    def _timedelta_to_quantity(self, timedelta: datetime.timedelta) -> float:
+    def _timedelta_to_quantity(self, delta: timedelta) -> float:
         if self.units.lower().startswith("second"):
-            return int(timedelta.total_seconds())
+            return int(delta.total_seconds())
         elif self.units.lower().startswith("minute"):
-            return int(round(timedelta.total_seconds() / 60))
+            return int(round(delta.total_seconds() / 60))
         elif self.units.lower().startswith("hour"):
-            return int(round(timedelta.total_seconds() / 60 / 60))
+            return int(round(delta.total_seconds() / 60 / 60))
         elif self.units.lower().startswith("day"):
-            return int(round(timedelta.total_seconds() / 60 / 60 / 24))
+            return int(round(delta.total_seconds() / 60 / 60 / 24))
         else:
-            return int(timedelta.total_seconds() / 60)
+            return int(delta.total_seconds() / 60)
 
-    def _quantity_to_timedelta(self, quantity: int) -> datetime.timedelta:
+    def _quantity_to_timedelta(self, quantity: int) -> timedelta:
         if self.units.lower().startswith("second"):
-            return datetime.timedelta(seconds=quantity)
+            return timedelta(seconds=quantity)
         elif self.units.lower().startswith("minute"):
-            return datetime.timedelta(minutes=quantity)
+            return timedelta(minutes=quantity)
         elif self.units.lower().startswith("hour"):
-            return datetime.timedelta(hours=quantity)
+            return timedelta(hours=quantity)
         elif self.units.lower().startswith("day"):
-            return datetime.timedelta(hours=quantity * 24)
+            return timedelta(hours=quantity * 24)
         else:
-            return datetime.timedelta(minutes=quantity)
+            return timedelta(minutes=quantity)
 
     def set_timezone(self, timezone: str):
         """Set the user-facing timezone."""
-        self._ui_tz = dateutil.tz.gettz(timezone)
+        self._ui_tz = tz.gettz(timezone)
         if self._ui_tz is None:
             raise ValueError(f"Not a valid IANA Time Zone Name : {timezone}")
 
@@ -230,8 +266,8 @@ class LogDb:
 
         Return True if start-end span includes a weekday.
         """
-        start_day = dateutil.parser.parse(start).weekday()
-        end_day = dateutil.parser.parse(end).weekday()
+        start_day = parser.parse(start).weekday()
+        end_day = parser.parse(end).weekday()
         return day in range(start_day, end_day + 1)
 
     def filter(
@@ -257,10 +293,10 @@ class LogDb:
                 "OR (start <= ? AND end >= ?))"
             )
             values.extend([start, end] * 3)
-        elif end is None and isinstance(start, datetime.datetime):
+        elif end is None and isinstance(start, datetime):
             clauses.append("? <= end")
             values.append(start)
-        elif start is None and isinstance(end, datetime.datetime):
+        elif start is None and isinstance(end, datetime):
             clauses.append("? >= start")
             values.append(start)
         if activity is not None:
@@ -303,7 +339,7 @@ class LogDb:
         apply_capitalization: bool = False,
     ):
         """Return the id of the inserted entry."""
-        if isinstance(quantity, datetime.timedelta):
+        if isinstance(quantity, timedelta):
             quantity = self._timedelta_to_quantity(quantity)
         if id is not None:
             self.remove_entry(id)
@@ -373,8 +409,8 @@ class LogDb:
 
     def shift_rows(self, ids, amount):
         if isinstance(amount, (float, int)):
-            amount = datetime.timedelta(seconds=amount)
-        assert isinstance(amount, datetime.timedelta)
+            amount = timedelta(seconds=amount)
+        assert isinstance(amount, timedelta)
         data = list()
         for id_ in ids:
             assert isinstance(id_, int)
@@ -388,22 +424,16 @@ class LogDb:
             self.create_entry(**row)
 
     @staticmethod
-    def _row_density(
-        quantity: int, start: datetime.datetime, end: datetime.datetime
-    ) -> float:
-        assert isinstance(start, datetime.datetime)
-        assert isinstance(end, datetime.datetime)
+    def _row_density(quantity: int, start: datetime, end: datetime) -> float:
+        assert isinstance(start, datetime)
+        assert isinstance(end, datetime)
         span = float((start - end).total_seconds()) / 60 / 60
         if span == 0:
             return 0
         return quantity / span
 
     def _merge_common(
-        self,
-        activity: str,
-        start: datetime.datetime,
-        end: datetime.datetime,
-        quantity: int,
+        self, activity: str, start: datetime, end: datetime, quantity: int
     ):
         rows = self.filter(activity, start, end)
         ids_to_delete = []
@@ -479,8 +509,8 @@ class LogDb:
 
     def _normalize_range(
         self,
-        start: datetime.datetime = None,
-        end: datetime.datetime = None,
+        start: datetime = None,
+        end: datetime = None,
         quantity: int = None,
     ):
         """
@@ -519,7 +549,7 @@ class LogDb:
                 )
         return start, end, quantity
 
-    def bounded_quantity(self, span: datetime.timedelta) -> int:
+    def bounded_quantity(self, span: timedelta) -> int:
         """
         Return a pro-rated quantity given a timedelta and the bounds setting,
         which represents units per hour.
@@ -535,7 +565,7 @@ class LogDb:
         # A bounds setting of zero means that the quantities are unbounded.
         if self.bounds == 0:
             return None
-        if isinstance(quantity, datetime.timedelta):
+        if isinstance(quantity, timedelta):
             quantity = self._timedelta_to_quantity(quantity)
         overlaps = list()
         new_rows = list()
@@ -692,8 +722,8 @@ class LogDb:
         unrecorded will add an unrecorded entry.
         """
         assert start < end
-        assert isinstance(start, datetime.datetime)
-        assert isinstance(end, datetime.datetime)
+        assert isinstance(start, datetime)
+        assert isinstance(end, datetime)
         overlap = self.filter(start=start, end=end, activity=activity)
         # span = (end-start).total_seconds()
         span = self._timedelta_to_quantity(end - start)
@@ -719,8 +749,8 @@ class LogDb:
     def span_slices(
         self,
         start,
-        span=datetime.timedelta(days=1),
-        slice_size=datetime.timedelta(minutes=15),
+        span=timedelta(days=1),
+        slice_size=timedelta(minutes=15),
         level=None,
         unrecorded=None,
     ):
@@ -733,24 +763,22 @@ class LogDb:
             span = self._quantity_to_timedelta(span)
         if isinstance(slice_size, (float, int)):
             slice_size = self._quantity_to_timedelta(slice_size)
-        if isinstance(slice_size, datetime.timedelta):
+        if isinstance(slice_size, timedelta):
             slice_size = slice_size.total_seconds()
-        if isinstance(span, datetime.timedelta):
+        if isinstance(span, timedelta):
             span = span.total_seconds()
         if span % slice_size:
             slice_size = span / round(span / float(slice_size))
-        if not isinstance(start, datetime.datetime) and isinstance(
-            start, datetime.date
-        ):
-            start = datetime.datetime(start.year, start.month, start.day, 0, 0, 0)
+        if not isinstance(start, datetime) and isinstance(start, datetime.date):
+            start = datetime(start.year, start.month, start.day, 0, 0, 0)
         slices_in_span = int(span / slice_size)
         slice_midpoints = []
         activity_series = {}
         for i in range(slices_in_span):
-            slice_start = start + datetime.timedelta(seconds=(i * slice_size))
-            slice_midpoint = slice_start + datetime.timedelta(seconds=slice_size / 2.0)
+            slice_start = start + timedelta(seconds=(i * slice_size))
+            slice_midpoint = slice_start + timedelta(seconds=slice_size / 2.0)
             slice_midpoints.append(slice_midpoint)
-            slice_end = slice_start + datetime.timedelta(seconds=slice_size)
+            slice_end = slice_start + timedelta(seconds=slice_size)
             activities = self.slice_activities(
                 slice_start, slice_end, level, unrecorded
             )
@@ -765,8 +793,8 @@ class LogDb:
     def stacked_slices(
         self,
         start,
-        span=datetime.timedelta(days=1),
-        slice_size=datetime.timedelta(minutes=15),
+        span=timedelta(days=1),
+        slice_size=timedelta(minutes=15),
         level=None,
         unrecorded=None,
         weekdays=None,
@@ -781,44 +809,40 @@ class LogDb:
         weekdays parameter parameter is only applied to daily stack.
         """
         # TODO : Filter weekdays for weekly
-        if isinstance(span, datetime.timedelta):
+        if isinstance(span, timedelta):
             end = start + span
         elif isinstance(span, (float, int)):
-            end = start + datetime.timedelta(seconds=span)
+            end = start + timedelta(seconds=span)
         if weekly:
             year, week, weekday = start.isocalendar()
             start_date = iso_to_gregorian(year, week, 1)
             increment_count = max(
                 1,
                 round(
-                    (end - start).total_seconds()
-                    / datetime.timedelta(days=7).total_seconds()
+                    (end - start).total_seconds() / timedelta(days=7).total_seconds()
                 ),
             )
         else:
             increment_count = int(
-                round(
-                    (end - start).total_seconds()
-                    / datetime.timedelta(days=1).total_seconds()
-                )
+                round((end - start).total_seconds() / timedelta(days=1).total_seconds())
             )
         midpoints = None
         activity_series = dict()
         if weekly:
-            current = datetime.datetime(
+            current = datetime(
                 start_date.year, start_date.month, start_date.day, 0, 0, 0
             )
-            step = datetime.timedelta(days=7)
+            step = timedelta(days=7)
         else:
-            current = datetime.datetime(start.year, start.month, start.day, 0, 0, 0)
-            step = datetime.timedelta(days=1)
+            current = datetime(start.year, start.month, start.day, 0, 0, 0)
+            step = timedelta(days=1)
         for increment in range(increment_count):
             if (
                 not weekly
                 and weekdays is not None
                 and current.weekday() not in weekdays
             ):
-                current = current + datetime.timedelta(days=1)
+                current = current + timedelta(days=1)
                 continue
             current_midpoints, current_activities = self.span_slices(
                 current,
@@ -967,9 +991,7 @@ class LogDb:
         if style_b != (None, None, None):
             return LogDb._seconds_from_strings(*style_b)
 
-    def slice_contrib(
-        self, row, start: datetime.datetime, end: datetime.datetime
-    ) -> int:
+    def slice_contrib(self, row, start: datetime, end: datetime) -> int:
         """
         Return the quantity that a row contains within a given time span.
         """
