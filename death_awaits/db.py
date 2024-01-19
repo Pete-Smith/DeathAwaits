@@ -5,6 +5,7 @@ import copy
 import os
 import re
 import sqlite3
+from enum import Enum
 
 from dateutil import tz, parser
 
@@ -14,6 +15,17 @@ from death_awaits.helper import iso_to_gregorian
 
 
 def _datetime_adapter_factory(
+class Increment(Enum):
+    SECOND = 0
+    MINUTE = 1
+    HOUR = 2
+    DAY = 3
+    YEAR_DAY = 4  # Stacks leap days with previous day.
+    WEEK = 5
+    YEAR = 6
+    DECADE = 7
+
+
     ui_timezone: Optional[str], storage_timezone: Optional[str]
 ) -> Callable[datetime]:
     """
