@@ -14,7 +14,6 @@ from dateutil import tz, parser
 from death_awaits.helper import iso_to_gregorian
 
 
-def _datetime_adapter_factory(
 class Increment(Enum):
     SECOND = 0
     MINUTE = 1
@@ -26,8 +25,24 @@ class Increment(Enum):
     DECADE = 7
 
 
+def _resolve_timezone(timezone: Optional[str], default_utc: bool):
+    """
+    Resolve an IANA string to a timezone object,
+    if None is passed it will return UTC or the local time
+    based on the default_utc parameter.
+    """
+    if timezone is None:
+        if default_utc:
+            return tz.tzutc()
+        else:
+            return tz.tzlocal()
+    else:
+        return tz.gettz(timezone)
+
+
+def datetime_adapter_factory(
     ui_timezone: Optional[str], storage_timezone: Optional[str]
-) -> Callable[datetime]:
+) -> Callable[[datetime], bytes]:
     """
     SQLite database adapter factory for datetime objects.
 
@@ -35,18 +50,34 @@ class Increment(Enum):
     into byte strings for storage.
     During this transformation, the function handles the timezone conversion
     from the UI timezone to the storage timezone.
+    It will also round microseconds to the nearest second,
+    and resolve ambiguous or non-existent values.
 
     The ui_timezone parameter will default to the local timezone.
     The storage_timezone parameter will default to UTC.
     """
-    if ui_timezone is None:
-        pass
-    pass
+    ui_tz = _resolve_timezone(ui_timezone, False)
+    storage_tz = _resolve_timezone(storage_timezone, True)
+
+    def _adapter(value: datetime) -> bytes:
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=ui_tz)
+        if value.microsecond != 0:
+            value = value.replace(
+                second=value.second + round(value.microsecond / 1_000_000),
+                microsecond=0,
+            )
+        value = value.astimezone(storage_tz)
+        return (
+            tz.resolve_imaginary(value).replace(tzinfo=None).isoformat().encode("ascii")
+        )
+
+    return _adapter
 
 
-def _datetime_converter_factory(
+def datetime_converter_factory(
     ui_timezone: Optional[str], storage_timezone: Optional[str]
-) -> Callable[bytes]:
+) -> Callable[[bytes], datetime]:
     """
     SQLite database converter factory for datetime objects.
 
@@ -54,11 +85,26 @@ def _datetime_converter_factory(
     Python datetime objects for use in the application.
     During this transformation, the function handles the timezone conversion
     from the storage timezone to the UI timezone.
+    It will also round microseconds to the nearest second,
+    and resolve ambiguous or non-existent values.
 
     The ui_timezone parameter will default to the local timezone.
     The storage_timezone parameter will default to UTC.
     """
-    pass
+    ui_tz = _resolve_timezone(ui_timezone, False)
+    storage_tz = _resolve_timezone(storage_timezone, True)
+
+    def _converter(value: bytes) -> datetime:
+        dt = datetime.fromisoformat(value.decode("ascii")).replace(tzinfo=storage_tz)
+        if dt.microsecond != 0:
+            dt = dt.replace(
+                second=dt.second + round(dt.microsecond / 1_000_000),
+                microsecond=0,
+            )
+        dt = dt.astimezone(ui_tz)
+        return tz.resolve_imaginary(dt)
+
+    return _converter
 
 
 class SchemaMismatch(Exception):
