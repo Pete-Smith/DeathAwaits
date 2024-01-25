@@ -117,9 +117,8 @@ class LogDb:
     log_table_def = (
         ("id", "integer PRIMARY KEY"),
         ("activity", "text"),
-        # TODO: Default adapters are deprecated in the sqlite3 module.
-        ("start", "timestamp"),
-        ("end", "timestamp"),
+        ("start", "datetime"),
+        ("end", "datetime"),
         ("quantity", "int"),  # minutes as default
     )
     settings_table_def = (
@@ -139,8 +138,8 @@ class LogDb:
         filename: str,
         units: Optional[str] = None,
         overflow: Optional[bool] = None,
-        storage_timezone: Optional[str] = None,
         ui_timezone: Optional[str] = None,
+        storage_timezone: Optional[str] = None,
     ):
         """
         Open or initialize a Death Awaits Time Series Database.
@@ -150,10 +149,14 @@ class LogDb:
         These are set once when creating a file, and can not be changed retroactively.
 
         The storage_timezone will default to UTC, if not specified.
-        The user-facing timezone will default to US/Eastern, if not specified.
-        The user-facing timezone can be updated at any time.
+        The user-facing timezone will default to the local timezone, if not specified.
         """
-        self.set_timezone(ui_timezone or "US/Eastern")
+        sqlite3.register_adapter(
+            "datetime", datetime_adapter_factory(ui_timezone, storage_timezone)
+        )
+        sqlite3.register_converter(
+            "datetime", datetime_converter_factory(ui_timezone, storage_timezone)
+        )
         self._undo_stack = list()
         self._redo_stack = list()
         self._current_action = None
@@ -298,12 +301,6 @@ class LogDb:
             return timedelta(hours=quantity * 24)
         else:
             return timedelta(minutes=quantity)
-
-    def set_timezone(self, timezone: str):
-        """Set the user-facing timezone."""
-        self._ui_tz = tz.gettz(timezone)
-        if self._ui_tz is None:
-            raise ValueError(f"Not a valid IANA Time Zone Name : {timezone}")
 
     @staticmethod
     def regexp(expr: str, item: str) -> bool:
