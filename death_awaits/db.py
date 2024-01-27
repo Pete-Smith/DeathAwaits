@@ -107,10 +107,6 @@ def datetime_converter_factory(
     return _converter
 
 
-class SchemaMismatch(Exception):
-    pass
-
-
 class LogDb:
     """On-disk data store."""
 
@@ -126,12 +122,10 @@ class LogDb:
         ("units", "text"),
         ("overflow", "bool"),  # Allow overloaded time spans.
         ("timezone", "text"),  # IANA time zone name
-        ("schema_version", "integer"),
     )
     # entry_added = core.pyqtSignal(int)
     # entry_modified = core.pyqtSignal(int)
     # entry_removed = core.pyqtSignal(int)
-    schema_version = 3
 
     def __init__(
         self,
@@ -197,30 +191,24 @@ class LogDb:
             self.units = units
             self.overflow = overflow
         else:  # if new_file == False
-            self._check_quantity_column()
             cursor = self.connection.cursor()
             try:
-                cursor.execute(
-                    "SELECT units, overflow, timezone, schema_version FROM settings"
-                )
+                cursor.execute("SELECT units, overflow, timezone FROM settings")
                 row = cursor.fetchone()
-                self.bounds = row[0]
-                self.units = row[1]
-                if (bounds is not None and bounds != self.bounds) or (
+                self.units = row[0]
+                self.overflow = row[1]
+                if (units is not None and units != self.units) or (
                     units is not None and units != self.units
                 ):
                     raise ValueError(
                         "Passed mismatching bounds and/or units parameters "
                         "to existing database."
                     )
-                if self.schema_version != row[2]:
-                    raise SchemaMismatch(
-                        f"Expected schema version {self.schema_version} "
-                        f"found schema version {row[2]}."
-                    )
             except sqlite3.OperationalError as e:
                 if str(e).lower() == "no such table: settings":
-                    self._create_settings_table(cursor, units)
+                    self._create_settings_table(
+                        cursor, units, overflow, storage_timezone
+                    )
                     self.bounds = bounds
                     self.units = units
                 else:
@@ -247,36 +235,10 @@ class LogDb:
             + ")"
         )
         cursor.execute(
-            "INSERT INTO settings (units, overflow, storage_timezone, schema_version)"
+            "INSERT INTO settings (units, overflow, storage_timezone)"
             " VALUES (?, ?, ?)",
-            (units, overflow, storage_timezone, self.schema_version),
+            (units, overflow, storage_timezone),
         )
-
-    def _check_quantity_column(self):
-        """
-        In older versions of the database,
-        the quantity column was named duration.
-        It was an integer of minutes.
-        """
-        cursor = self.connection.cursor()
-        try:
-            cursor.execute("PRAGMA table_info(activitylog);")
-            columns = [row["name"] for row in cursor.fetchall()]
-            if "duration" in columns:
-                cursor.execute("ALTER TABLE activitylog RENAME TO activitylog_old")
-                self._create_activitylog_table(cursor)
-                cursor.execute("SELECT * FROM activitylog_old")
-                for row in cursor.fetchall():
-                    cursor.execute(
-                        "INSERT INTO "
-                        "activitylog (activity, start, end, quantity) "
-                        "VALUES (?, ?, ?, ?)",
-                        (row["activity"], row["start"], row["end"], row["duration"]),
-                    )
-                cursor.execute("DROP TABLE activitylog_old")
-        finally:
-            cursor.close()
-            self.connection.commit()
 
     def _timedelta_to_quantity(self, delta: timedelta) -> float:
         if self.units.lower().startswith("second"):
