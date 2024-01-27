@@ -162,7 +162,6 @@ class LogDb:
         )
         self.connection.row_factory = sqlite3.Row
         self.connection.create_function("REGEXP", 2, LogDb.regexp)
-        self.connection.create_function("contains_weekday", 3, LogDb.contains_weekday)
         if new_file:
             if None in (units, overflow):
                 raise ValueError(
@@ -275,18 +274,6 @@ class LogDb:
         result = reg.search(item)
         return result is not None
 
-    @staticmethod
-    def contains_weekday(start: str, end: str, day: int) -> bool:
-        """
-        SQLite registered function takes two ISO datetimes and a weekday
-        integer.
-
-        Return True if start-end span includes a weekday.
-        """
-        start_day = parser.parse(start).weekday()
-        end_day = parser.parse(end).weekday()
-        return day in range(start_day, end_day + 1)
-
     def filter(
         self,
         activity=None,
@@ -294,7 +281,6 @@ class LogDb:
         end=None,
         first: bool = False,
         last: bool = False,
-        weekdays=None,
     ):
         """
         The activity, start and end parameters are filters.
@@ -319,13 +305,6 @@ class LogDb:
         if activity is not None:
             clauses.append("activity REGEXP ?")
             values.append(activity)
-        if weekdays:
-            clauses.append(
-                "("
-                + (" OR ".join(["contains_weekday(start, end, ?)"] * len(weekdays)))
-                + ")"
-            )
-            values.extend(weekdays)
         if clauses:
             statement += "WHERE " + (" AND ".join(clauses)) + " "
         if last and not first:
