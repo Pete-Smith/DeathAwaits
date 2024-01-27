@@ -7,9 +7,7 @@ import re
 import sqlite3
 from enum import Enum
 
-from dateutil import tz, parser
-
-# import PyQt6.QtCore as core
+from dateutil import tz
 
 from death_awaits.helper import iso_to_gregorian
 
@@ -23,9 +21,10 @@ class Increment(Enum):
     WEEK = 5
     YEAR = 6
     DECADE = 7
+    CENTURY = 8
 
 
-def _resolve_timezone(timezone: Optional[str], default_utc: bool):
+def _resolve_timezone(timezone: Optional[str] = None, default_utc: bool = True):
     """
     Resolve an IANA string to a timezone object,
     if None is passed it will return UTC or the local time
@@ -41,7 +40,7 @@ def _resolve_timezone(timezone: Optional[str], default_utc: bool):
 
 
 def datetime_adapter_factory(
-    ui_timezone: Optional[str], storage_timezone: Optional[str]
+    ui_timezone: Optional[str] = None, storage_timezone: Optional[str] = None
 ) -> Callable[[datetime], bytes]:
     """
     SQLite database adapter factory for datetime objects.
@@ -76,7 +75,7 @@ def datetime_adapter_factory(
 
 
 def datetime_converter_factory(
-    ui_timezone: Optional[str], storage_timezone: Optional[str]
+    ui_timezone: Optional[str] = None, storage_timezone: Optional[str] = None
 ) -> Callable[[bytes], datetime]:
     """
     SQLite database converter factory for datetime objects.
@@ -129,7 +128,7 @@ class LogDb:
 
     def __init__(
         self,
-        filename: str,
+        filename: str = ":memory:",
         units: Optional[str] = None,
         overflow: Optional[bool] = None,
         ui_timezone: Optional[str] = None,
