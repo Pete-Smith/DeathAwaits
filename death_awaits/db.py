@@ -1,27 +1,15 @@
+""" Database functionality. """
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 import copy
 import os
 import re
 import sqlite3
-from enum import Enum
 
 from dateutil import tz
 
 from death_awaits.helper import iso_to_gregorian
-
-
-class Increment(Enum):
-    SECOND = 0
-    MINUTE = 1
-    HOUR = 2
-    DAY = 3
-    YEAR_DAY = 4  # Stacks leap days with previous day.
-    WEEK = 5
-    YEAR = 6
-    DECADE = 7
-    CENTURY = 8
 
 
 def _resolve_timezone(timezone: Optional[str] = None, default_utc: bool = True):
@@ -33,10 +21,8 @@ def _resolve_timezone(timezone: Optional[str] = None, default_utc: bool = True):
     if timezone is None:
         if default_utc:
             return tz.tzutc()
-        else:
-            return tz.tzlocal()
-    else:
-        return tz.gettz(timezone)
+        return tz.tzlocal()
+    return tz.gettz(timezone)
 
 
 def datetime_adapter_factory(
@@ -138,15 +124,16 @@ class LogDb:
         Open or initialize a Death Awaits Time Series Database.
 
         The following are initialization parameters and are not expected to be
-        passed when opening an existing file: units, overflow, and storage_timezone.
-        These are set once when creating a file, and can not be changed retroactively.
+        passed when opening an existing file: units, overflow, and
+        storage_timezone.
+        These are set once when creating a file, and can not be changed
+        retroactively.
 
         The storage_timezone will default to UTC, if not specified.
-        The user-facing timezone will default to the local timezone, if not specified.
+        The user-facing timezone will default to the local timezone, if not
+        specified.
         """
-        sqlite3.register_adapter(
-            "datetime", datetime_adapter_factory(ui_timezone, storage_timezone)
-        )
+        sqlite3.register_adapter(datetime, datetime_adapter_factory(ui_timezone, storage_timezone))
         sqlite3.register_converter(
             "datetime", datetime_converter_factory(ui_timezone, storage_timezone)
         )
@@ -173,7 +160,7 @@ class LogDb:
                     or units.lower().startswith("hour")
                     or units.lower().startswith("day")
                 )
-                and overflow == True
+                and bool(overflow)
             ):
                 raise ValueError(
                     "Overflow behavior will only work with the following units: "
@@ -1007,7 +994,7 @@ class LogDb:
         else:
             return 0
 
-    def record_change(self, entry, action="add"):
+    def record_change(self, entry:dict, action:str="add"):
         """
         Record the old version of a modified or deleted entry.
         Or the added version of a created entry.
