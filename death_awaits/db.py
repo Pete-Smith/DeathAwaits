@@ -1,95 +1,20 @@
 """ Database functionality. """
+
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from typing import Optional, Callable, List
+from typing import Optional
 import copy
 import os
 import re
 import sqlite3
 
-from dateutil import tz
 
 from death_awaits.helper import iso_to_gregorian
-
-
-def _resolve_timezone(timezone: Optional[str] = None, default_utc: bool = True):
-    """
-    Resolve an IANA string to a timezone object,
-    if None is passed it will return UTC or the local time
-    based on the default_utc parameter.
-    """
-    if timezone is None:
-        if default_utc:
-            return tz.tzutc()
-        return tz.tzlocal()
-    return tz.gettz(timezone)
-
-
-def datetime_adapter_factory(
-    ui_timezone: Optional[str] = None, storage_timezone: Optional[str] = None
-) -> Callable[[datetime], bytes]:
-    """
-    SQLite database adapter factory for datetime objects.
-
-    The returned function will transform Python datetime objects
-    into byte strings for storage.
-    During this transformation, the function handles the timezone conversion
-    from the UI timezone to the storage timezone.
-    It will also round microseconds to the nearest second,
-    and resolve ambiguous or non-existent values.
-
-    The ui_timezone parameter will default to the local timezone.
-    The storage_timezone parameter will default to UTC.
-    """
-    ui_tz = _resolve_timezone(ui_timezone, False)
-    storage_tz = _resolve_timezone(storage_timezone, True)
-
-    def _adapter(value: datetime) -> bytes:
-        if value.tzinfo is None:
-            value = value.replace(tzinfo=ui_tz)
-        if value.microsecond != 0:
-            value = value.replace(
-                second=value.second + round(value.microsecond / 1_000_000),
-                microsecond=0,
-            )
-        value = value.astimezone(storage_tz)
-        return (
-            tz.resolve_imaginary(value).replace(tzinfo=None).isoformat().encode("ascii")
-        )
-
-    return _adapter
-
-
-def datetime_converter_factory(
-    ui_timezone: Optional[str] = None, storage_timezone: Optional[str] = None
-) -> Callable[[bytes], datetime]:
-    """
-    SQLite database converter factory for datetime objects.
-
-    The returned function will transform byte strings to
-    Python datetime objects for use in the application.
-    During this transformation, the function handles the timezone conversion
-    from the storage timezone to the UI timezone.
-    It will also round microseconds to the nearest second,
-    and resolve ambiguous or non-existent values.
-
-    The ui_timezone parameter will default to the local timezone.
-    The storage_timezone parameter will default to UTC.
-    """
-    ui_tz = _resolve_timezone(ui_timezone, False)
-    storage_tz = _resolve_timezone(storage_timezone, True)
-
-    def _converter(value: bytes) -> datetime:
-        dt = datetime.fromisoformat(value.decode("ascii")).replace(tzinfo=storage_tz)
-        if dt.microsecond != 0:
-            dt = dt.replace(
-                second=dt.second + round(dt.microsecond / 1_000_000),
-                microsecond=0,
-            )
-        dt = dt.astimezone(ui_tz)
-        return tz.resolve_imaginary(dt)
-
-    return _converter
+from death_awaits.types import (
+    datetime_adapter_factory,
+    datetime_converter_factory,
+    Activity,
+)
 
 
 class LogDb:
@@ -97,7 +22,7 @@ class LogDb:
 
     log_table_def = (
         ("id", "integer PRIMARY KEY"),
-        ("activity", "text"),
+        ("activity", "activity"),
         ("start", "datetime"),
         ("end", "datetime"),
         ("quantity", "int"),  # minutes as default
@@ -133,10 +58,14 @@ class LogDb:
         The user-facing timezone will default to the local timezone, if not
         specified.
         """
-        sqlite3.register_adapter(datetime, datetime_adapter_factory(ui_timezone, storage_timezone))
+        sqlite3.register_adapter(
+            datetime, datetime_adapter_factory(ui_timezone, storage_timezone)
+        )
         sqlite3.register_converter(
             "datetime", datetime_converter_factory(ui_timezone, storage_timezone)
         )
+        sqlite3.register_adapter(Activity, Activity.adapter)
+        sqlite3.register_converter("activity", Activity.converter)
         self._undo_stack = list()
         self._redo_stack = list()
         self._current_action = None
@@ -153,15 +82,12 @@ class LogDb:
                 raise ValueError(
                     "The units and overflow parameters need to be set to create a new database."
                 )
-            if (
-                not (
-                    units.lower().startswith("second")
-                    or units.lower().startswith("minute")
-                    or units.lower().startswith("hour")
-                    or units.lower().startswith("day")
-                )
-                and bool(overflow)
-            ):
+            if not (
+                units.lower().startswith("second")
+                or units.lower().startswith("minute")
+                or units.lower().startswith("hour")
+                or units.lower().startswith("day")
+            ) and bool(overflow):
                 raise ValueError(
                     "Overflow behavior will only work with the following units: "
                     "days, hours, minutes, seconds."
@@ -994,7 +920,7 @@ class LogDb:
         else:
             return 0
 
-    def record_change(self, entry:dict, action:str="add"):
+    def record_change(self, entry: dict, action: str = "add"):
         """
         Record the old version of a modified or deleted entry.
         Or the added version of a created entry.
