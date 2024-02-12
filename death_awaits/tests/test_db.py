@@ -17,7 +17,7 @@ def hours(n):
 
 @pytest.fixture
 def test_database():
-    return LogDb(":memory:", bounds=60, units="minutes")
+    return LogDb(":memory:", overflow=False)
 
 
 @pytest.fixture
