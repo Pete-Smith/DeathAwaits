@@ -183,7 +183,7 @@ class LogDb:
             (units, overflow, timezone),
         )
 
-    def _timedelta_to_quantity(self, delta: timedelta) -> float:
+    def _timedelta_to_quantity(self, delta: timedelta) -> int:
         if self.units.lower().startswith("second"):
             return int(delta.total_seconds())
         elif self.units.lower().startswith("minute"):
