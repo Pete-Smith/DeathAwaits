@@ -33,9 +33,6 @@ class LogDb:
         ("overflow", "bool"),  # Allow overloaded time spans.
         ("timezone", "text"),  # IANA time zone name
     )
-    # entry_added = core.pyqtSignal(int)
-    # entry_modified = core.pyqtSignal(int)
-    # entry_removed = core.pyqtSignal(int)
 
     def __init__(
         self,
@@ -44,6 +41,7 @@ class LogDb:
         overflow: Optional[bool] = None,
         ui_timezone: Optional[str] = None,
         storage_timezone: Optional[str] = None,
+        signaling_fixture=None,
     ):
         """
         Open or initialize a Death Awaits Time Series Database.
@@ -57,7 +55,10 @@ class LogDb:
         The storage_timezone will default to UTC, if not specified.
         The user-facing timezone will default to the local timezone, if not
         specified.
+
+        The signaling_fixture is an intermediary object we can call Qt signals from.
         """
+        self._signaling_fixture = signaling_fixture
         sqlite3.register_adapter(
             datetime, datetime_adapter_factory(ui_timezone, storage_timezone)
         )
@@ -127,6 +128,16 @@ class LogDb:
             finally:
                 cursor.close()
                 self.connection.commit()
+
+    def signal(self, verb: str, row: int):
+        if self._signaling_fixture is not None:
+            if hasattr(self._signaling_fixture, verb):
+                if hasattr(self.signaling_fixture.verb, "emit"):
+                    self.signaling_fixture.verb.emit(row)
+                else:
+                    raise AttributeError()
+            else:
+                raise AttributeError()
 
     def _create_activitylog_table(self, cursor):
         cursor.execute("DROP INDEX IF EXISTS start_times")
@@ -278,7 +289,7 @@ class LogDb:
         finally:
             c.close()
             self.connection.commit()
-            self.entry_added.emit(c.lastrowid)
+            self.signal("entry_added", c.lastrowid)
 
     def rename_entry(self, activity, ids, apply_capitalization=False):
         if isinstance(ids, int):
@@ -313,7 +324,7 @@ class LogDb:
             c.close()
             self.connection.commit()
         for id_ in effected_rows:
-            self.entry_modified.emit(id_)
+            self.signal("entry_modified", id_)
 
     def shift_rows(self, ids, amount):
         if isinstance(amount, (float, int)):
@@ -376,7 +387,7 @@ class LogDb:
                 c.close()
                 self.connection.commit()
         for id_ in ids_to_delete:
-            self.entry_removed.emit(id_)
+            self.signal("entry_removed", id_)
         return activity, start, end, quantity
 
     def _check_activity(self, activity, apply_capitalization=False):
@@ -410,7 +421,7 @@ class LogDb:
                 c.close()
                 self.connection.commit()
             for id_ in ids:
-                self.entry_modified.emit(id_)
+                self.signal("entry_modified", id_)
         elif preexisting:
             activity = preexisting
         return activity
@@ -615,11 +626,11 @@ class LogDb:
             c.close()
             self.connection.commit()
         for id_ in modified_ids:
-            self.entry_modified.emit(id_)
+            self.signal("entry_modified", id_)
         for id_ in removed_ids:
-            self.entry_removed.emit(id_)
+            self.signal("entry_removed", id_)
         for id_ in created_ids:
-            self.entry_added.emit(id_)
+            self.signal("entry_added", id_)
 
     def slice_activities(self, start, end, level=None, unrecorded=True, activity=None):
         """
@@ -801,7 +812,7 @@ class LogDb:
         finally:
             c.close()
             self.connection.commit()
-        self.entry_removed.emit(id_)
+        self.signal("entry_removed", id_)
 
     def row(self, id_):
         """Singleton row look-up by id."""
@@ -966,8 +977,8 @@ class LogDb:
                 c.execute(statement, ids_to_delete)
             finally:
                 c.close()
-        for id in ids_to_delete:
-            self.entry_removed.emit(id)
+        for id_ in ids_to_delete:
+            self.signal("entry_removed", id_)
         for entry in change_entry["remove"]:
             statement = (
                 "INSERT INTO activitylog (id, activity, start, end, quantity) "
@@ -979,7 +990,7 @@ class LogDb:
                 c.execute(statement, values)
             finally:
                 c.close()
-                self.entry_added.emit(c.lastrowid)
+                self.signal("entry_added", c.lastrowid)
         for entry in change_entry["modify"]:
             if "id" in entry:
                 unchanged = self.row(entry["id"])
