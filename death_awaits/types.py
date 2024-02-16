@@ -192,14 +192,14 @@ class Activity:
         return Activity(" : ".join(retval))
 
     @staticmethod
-    def adapter(value: "Activity") -> str:
+    def adapter(value: "Activity") -> bytes:
         """Convert an Activity instance to a string for database storage."""
-        return str(value)
+        return str(value).encode("utf8")
 
     @staticmethod
-    def converter(value: str) -> "Activity":
+    def converter(value: bytes) -> "Activity":
         """Instantiate an Activity instance from a database string."""
-        return Activity(value)
+        return Activity(value.decode("utf8"))
 
 
 class Slice:

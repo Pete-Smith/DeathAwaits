@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 
+
+from dateutil import tz
 import pytest
 
 from death_awaits.db import LogDb
 
-NOW = datetime.now()
+NOW = datetime.now().replace(microsecond=0, tzinfo=tz.tzlocal())
 
 
 def minutes(n):
@@ -17,7 +19,7 @@ def hours(n):
 
 @pytest.fixture
 def test_database():
-    return LogDb(":memory:", overflow=False)
+    return LogDb(":memory:", overflow=False, units="minute")
 
 
 @pytest.fixture
