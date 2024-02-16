@@ -174,6 +174,11 @@ class Activity:
         else:
             raise StopIteration()
 
+    def case_sensitive_comparison(self, other: "Activity") -> bool:
+        if isinstance(other, Activity):
+            return str(self) == str(other)
+        return str(self) == other
+
     def common(self, other: "Activity") -> Optional["Activity"]:
         """
         Return a new Activity that includes the shared items between this activity and another.
