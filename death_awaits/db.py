@@ -139,6 +139,28 @@ class LogDb:
             else:
                 raise AttributeError()
 
+    @property
+    def bounds(self) -> float:
+        """
+        A units-per-hour boundary for quantity clamping.
+        Only works with certain units: seconds, minutes, hours and days.
+        All other units are unbounded.
+        """
+        if hasattr(self, "__bounds"):
+            return self.__bounds
+        if self.overflow:
+            if self.units.lower().startswith("second"):
+                self.__bounds = 60.0 * 60.0
+            elif self.units.lower().startswith("minute"):
+                self.__bounds = 60.0
+            elif self.units.lower().startswith("hour"):
+                self.__bounds = 1.0
+            elif self.units.lower().startswith("day"):
+                self.__bounds = 1.0 / 24.0
+        else:
+            self.__bounds = 0.0
+        return self.__bounds
+
     def _create_activitylog_table(self, cursor):
         cursor.execute("DROP INDEX IF EXISTS start_times")
         cursor.execute("DROP INDEX IF EXISTS end_times")
