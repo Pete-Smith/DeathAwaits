@@ -3,7 +3,7 @@
 import re
 from enum import Enum
 from typing import Optional, Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import tz
 
 
@@ -43,10 +43,10 @@ def datetime_adapter_factory(
         if value.tzinfo is None:
             value = value.replace(tzinfo=ui_tz)
         if value.microsecond != 0:
-            value = value.replace(
-                second=value.second + round(value.microsecond / 1_000_000),
-                microsecond=0,
-            )
+            second_to_add = int(round(value.microsecond / 1_000_000))
+            if second_to_add:
+                value += timedelta(seconds=1)
+            value = value.replace(microsecond=0)
         value = value.astimezone(storage_tz)
         return (
             tz.resolve_imaginary(value).replace(tzinfo=None).isoformat().encode("ascii")
