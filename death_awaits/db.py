@@ -412,13 +412,12 @@ class LogDb:
         return activity, start, end, quantity
 
     def _check_activity(self, activity, apply_capitalization=False):
-        activity = " : ".join(n.strip() for n in activity.split(":"))
         preexisting = None
-        for item in self.activities():
-            if activity.lower() == item.lower():
-                preexisting = item
+        for other in self.activities():
+            if activity == other:
+                preexisting = other
                 break
-        if apply_capitalization and activity != preexisting:
+        if apply_capitalization and not activity.case_sensitive_comparison(preexisting):
             pattern = r"^{0}$".format(re.escape(activity))
             ids = list()
             for row in self.filter(activity=pattern):
@@ -858,7 +857,7 @@ class LogDb:
             result = c.fetchall()
         finally:
             c.close()
-        return [row["activity"] for row in result]
+        return {row["activity"] for row in result}
 
     @staticmethod
     def format_duration(seconds):
