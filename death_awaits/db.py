@@ -71,7 +71,7 @@ class LogDb:
         self._redo_stack = list()
         self._current_action = None
         self._filename = filename
-        new_file = not os.path.isfile(self._filename)
+        new_file = filename == ":memory:" or not os.path.isfile(filename)
         self.connection = sqlite3.connect(
             self._filename,
             detect_types=sqlite3.PARSE_DECLTYPES,
@@ -121,8 +121,8 @@ class LogDb:
                     self._create_settings_table(
                         cursor, units, overflow, storage_timezone
                     )
-                    self.bounds = bounds
                     self.units = units
+                    self.overflow = overflow
                 else:
                     raise e
             finally:
@@ -150,16 +150,15 @@ class LogDb:
         cursor.execute("CREATE INDEX start_times ON activitylog (start)")
         cursor.execute("CREATE INDEX end_times ON activitylog (end)")
 
-    def _create_settings_table(self, cursor, units, overflow, storage_timezone):
+    def _create_settings_table(self, cursor, units, overflow, timezone):
         cursor.execute(
             "CREATE TABLE settings ("
             + (", ".join(["{0} {1}".format(k, t) for k, t in LogDb.settings_table_def]))
             + ")"
         )
         cursor.execute(
-            "INSERT INTO settings (units, overflow, storage_timezone)"
-            " VALUES (?, ?, ?)",
-            (units, overflow, storage_timezone),
+            "INSERT INTO settings (units, overflow, timezone)" " VALUES (?, ?, ?)",
+            (units, overflow, timezone),
         )
 
     def _timedelta_to_quantity(self, delta: timedelta) -> float:
