@@ -132,8 +132,8 @@ class LogDb:
     def signal(self, verb: str, row: int):
         if self._signaling_fixture is not None:
             if hasattr(self._signaling_fixture, verb):
-                if hasattr(self.signaling_fixture.verb, "emit"):
-                    self.signaling_fixture.verb.emit(row)
+                if hasattr(self._signaling_fixture.verb, "emit"):
+                    self._signaling_fixture.verb.emit(row)
                 else:
                     raise AttributeError()
             else:
