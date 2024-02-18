@@ -87,7 +87,7 @@ def datetime_converter_factory(
     return _converter
 
 
-class TimeIncrement(Enum):
+class TimeStep(Enum):
 
     SECOND = 0
     MINUTE = 1
@@ -105,7 +105,7 @@ class TimeIncrement(Enum):
     CENTURY = 13
     MILLENIUM = 14
 
-    def steps(self, other: "TimeIncrement", start: Optional[datetime]) -> float:
+    def steps(self, other: "TimeStep", start: Optional[datetime]) -> float:
         """
         Return the number of steps this increment fits inside of another increment,
         given a specific start time.
