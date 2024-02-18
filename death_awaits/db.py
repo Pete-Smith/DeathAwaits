@@ -147,7 +147,7 @@ class LogDb:
         All other units are unbounded.
         """
         if hasattr(self, "__bounds"):
-            return self.__bounds
+            return getattr(self,'__bounds')
         if self.overflow:
             if self.units.lower().startswith("second"):
                 self.__bounds = 60.0 * 60.0
@@ -166,7 +166,7 @@ class LogDb:
         cursor.execute("DROP INDEX IF EXISTS end_times")
         cursor.execute(
             "CREATE TABLE activitylog ("
-            + (", ".join(["{0} {1}".format(k, t) for k, t in LogDb.log_table_def]))
+            + (", ".join([f"{k} {t}" for k, t in LogDb.log_table_def]))
             + ")"
         )
         cursor.execute("CREATE INDEX start_times ON activitylog (start)")
@@ -175,37 +175,35 @@ class LogDb:
     def _create_settings_table(self, cursor, units, overflow, timezone):
         cursor.execute(
             "CREATE TABLE settings ("
-            + (", ".join(["{0} {1}".format(k, t) for k, t in LogDb.settings_table_def]))
+            + (", ".join([f"{k} {t}" for k, t in LogDb.settings_table_def]))
             + ")"
         )
         cursor.execute(
-            "INSERT INTO settings (units, overflow, timezone)" " VALUES (?, ?, ?)",
+            "INSERT INTO settings (units, overflow, timezone) VALUES (?, ?, ?)",
             (units, overflow, timezone),
         )
 
     def _timedelta_to_quantity(self, delta: timedelta) -> int:
         if self.units.lower().startswith("second"):
             return int(delta.total_seconds())
-        elif self.units.lower().startswith("minute"):
+        if self.units.lower().startswith("minute"):
             return int(round(delta.total_seconds() / 60))
-        elif self.units.lower().startswith("hour"):
+        if self.units.lower().startswith("hour"):
             return int(round(delta.total_seconds() / 60 / 60))
-        elif self.units.lower().startswith("day"):
+        if self.units.lower().startswith("day"):
             return int(round(delta.total_seconds() / 60 / 60 / 24))
-        else:
-            return int(delta.total_seconds() / 60)
+        return int(delta.total_seconds() / 60)
 
     def _quantity_to_timedelta(self, quantity: int) -> timedelta:
         if self.units.lower().startswith("second"):
             return timedelta(seconds=quantity)
-        elif self.units.lower().startswith("minute"):
+        if self.units.lower().startswith("minute"):
             return timedelta(minutes=quantity)
-        elif self.units.lower().startswith("hour"):
+        if self.units.lower().startswith("hour"):
             return timedelta(hours=quantity)
-        elif self.units.lower().startswith("day"):
+        if self.units.lower().startswith("day"):
             return timedelta(hours=quantity * 24)
-        else:
-            return timedelta(minutes=quantity)
+        return timedelta(minutes=quantity)
 
     @staticmethod
     def regexp(expr: str, item: str) -> bool:

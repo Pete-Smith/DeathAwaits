@@ -75,14 +75,14 @@ def datetime_converter_factory(
     storage_tz = _resolve_timezone(storage_timezone, True)
 
     def _converter(value: bytes) -> datetime:
-        dt = datetime.fromisoformat(value.decode("ascii")).replace(tzinfo=storage_tz)
-        if dt.microsecond != 0:
-            dt = dt.replace(
-                second=dt.second + round(dt.microsecond / 1_000_000),
+        retval = datetime.fromisoformat(value.decode("ascii")).replace(tzinfo=storage_tz)
+        if retval.microsecond != 0:
+            retval = retval.replace(
+                second=retval.second + round(retval.microsecond / 1_000_000),
                 microsecond=0,
             )
-        dt = dt.astimezone(ui_tz)
-        return tz.resolve_imaginary(dt)
+        retval = retval.astimezone(ui_tz)
+        return tz.resolve_imaginary(retval)
 
     return _converter
 
@@ -145,14 +145,14 @@ class Activity:
     def __lt__(self, value) -> bool:
         if isinstance(value, Activity):
             return str(self).lower() < str(value).lower()
-        elif isinstance(value, str):
+        if isinstance(value, str):
             return str(self).lower() < value.lower()
         return str(self).lower() < value
 
     def __eq__(self, value) -> bool:
         if isinstance(value, Activity):
             return str(self).lower() == str(value).lower()
-        elif isinstance(value, str):
+        if isinstance(value, str):
             return str(self).lower() == value.lower()
         return str(self).lower() == value
 
@@ -186,7 +186,7 @@ class Activity:
         """
         if self is other:
             return self
-        retval = list()
+        retval = []
         for a, b in zip(self, other):
             if a.lower() == b.lower():
                 retval.append(a)
