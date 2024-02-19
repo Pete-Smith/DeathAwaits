@@ -9,11 +9,11 @@ import re
 import sqlite3
 
 
-from death_awaits.helper import iso_to_gregorian
 from death_awaits.types import (
     datetime_adapter_factory,
     datetime_converter_factory,
     Activity,
+    iso_to_gregorian,
 )
 
 
@@ -67,8 +67,8 @@ class LogDb:
         )
         sqlite3.register_adapter(Activity, Activity.adapter)
         sqlite3.register_converter("activity", Activity.converter)
-        self._undo_stack = list()
-        self._redo_stack = list()
+        self._undo_stack = []
+        self._redo_stack = []
         self._current_action = None
         self._filename = filename
         new_file = filename == ":memory:" or not os.path.isfile(filename)
@@ -116,20 +116,21 @@ class LogDb:
                         "Passed mismatching bounds and/or units parameters "
                         "to existing database."
                     )
-            except sqlite3.OperationalError as e:
-                if str(e).lower() == "no such table: settings":
+            except sqlite3.OperationalError as exception:
+                if str(exception).lower() == "no such table: settings":
                     self._create_settings_table(
                         cursor, units, overflow, storage_timezone
                     )
                     self.units = units
                     self.overflow = overflow
                 else:
-                    raise e
+                    raise exception
             finally:
                 cursor.close()
                 self.connection.commit()
 
     def signal(self, verb: str, row: int):
+        """Emit a Qt signal through an intermediary class."""
         if self._signaling_fixture is not None:
             if hasattr(self._signaling_fixture, verb):
                 if hasattr(self._signaling_fixture.verb, "emit"):
@@ -147,7 +148,7 @@ class LogDb:
         All other units are unbounded.
         """
         if hasattr(self, "__bounds"):
-            return getattr(self,'__bounds')
+            return getattr(self, "__bounds")
         if self.overflow:
             if self.units.lower().startswith("second"):
                 self.__bounds = 60.0 * 60.0
@@ -213,7 +214,7 @@ class LogDb:
         if item is None:
             item = ""
         reg = re.compile(expr, re.IGNORECASE)
-        result = reg.search(item)
+        result = reg.search(str(item))
         return result is not None
 
     def filter(
@@ -847,14 +848,14 @@ class LogDb:
             c.close()
 
     def activities(self):
-        c = self.connection.cursor()
+        cursor = self.connection.cursor()
         try:
-            c.execute(
+            cursor.execute(
                 "SELECT DISTINCT activity FROM activitylog",
             )
-            result = c.fetchall()
+            result = cursor.fetchall()
         finally:
-            c.close()
+            cursor.close()
         return {row["activity"] for row in result}
 
     @staticmethod
@@ -1025,7 +1026,7 @@ class LogDb:
                 c.execute(statement, values)
             finally:
                 c.close()
-                self.entry_modified.emit(entry["id"])
+                self.signal("entry_modified", entry["id"])
         self.connection.commit()
         return inverse_entry
 

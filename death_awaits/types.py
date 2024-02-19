@@ -1,10 +1,31 @@
-""" Base Types """
+""" Foundational Types for Death Awaits Activity Log Application. """
 
 import re
 from enum import Enum
 from typing import Optional, Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from dateutil import tz
+
+
+def iso_year_start(iso_year: int) -> datetime:
+    """
+    The gregorian calendar date of the first day of the given ISO year
+
+    http://stackoverflow.com/questions/304256/whats-the-best-way-to-find-the-inverse-of-datetime-isocalendar
+    """
+    fourth_jan = date(iso_year, 1, 4)
+    delta = timedelta(fourth_jan.isoweekday() - 1)
+    return fourth_jan - delta
+
+
+def iso_to_gregorian(iso_year: int, iso_week: int, iso_day: int) -> datetime:
+    """
+    Gregorian calendar date for the given ISO year, week and day
+
+    http://stackoverflow.com/questions/304256/whats-the-best-way-to-find-the-inverse-of-datetime-isocalendar
+    """
+    year_start = iso_year_start(iso_year)
+    return year_start + timedelta(days=iso_day - 1, weeks=iso_week - 1)
 
 
 def _resolve_timezone(timezone: Optional[str] = None, default_utc: bool = True):
@@ -19,6 +40,7 @@ def _resolve_timezone(timezone: Optional[str] = None, default_utc: bool = True):
         return tz.tzlocal()
     return tz.gettz(timezone)
 
+# TODO: Would storing the datetime objects as integer timestamps be better for indexing?
 
 def datetime_adapter_factory(
     ui_timezone: Optional[str] = None, storage_timezone: Optional[str] = None
@@ -75,7 +97,9 @@ def datetime_converter_factory(
     storage_tz = _resolve_timezone(storage_timezone, True)
 
     def _converter(value: bytes) -> datetime:
-        retval = datetime.fromisoformat(value.decode("ascii")).replace(tzinfo=storage_tz)
+        retval = datetime.fromisoformat(value.decode("ascii")).replace(
+            tzinfo=storage_tz
+        )
         if retval.microsecond != 0:
             retval = retval.replace(
                 second=retval.second + round(retval.microsecond / 1_000_000),
@@ -88,7 +112,6 @@ def datetime_converter_factory(
 
 
 class TimeStep(Enum):
-
     SECOND = 0
     MINUTE = 1
     TEN_MINUTES = 2
@@ -171,10 +194,13 @@ class Activity:
             item = self[self._cursor]
             self._cursor += 1
             return item
-        else:
-            raise StopIteration()
+        raise StopIteration()
 
     def case_sensitive_comparison(self, other: "Activity") -> bool:
+        """
+        The standard equality operator will do a case insensitive.
+        This method does a case sensitive comparison.
+        """
         if isinstance(other, Activity):
             return str(self) == str(other)
         return str(self) == other
@@ -210,11 +236,34 @@ class Activity:
 class Slice:
     """
     This contains requisite elements of a log entry, but may represent a subdivided piece of one.
+    A Slice instance associated with a database entry will have a row attribute.
     """
 
-    __slots__ = ("_activity", "_start", "_end", "_quantity")
+    __slots__ = ("_activity", "_start", "_end", "_quantity", "_row")
 
     def __init__(
-        self, activity: Activity, start: datetime, end: datetime, quantity: int
+        self,
+        activity: Activity,
+        start: datetime,
+        end: datetime,
+        quantity: float,
+        row: Optional[int] = None,
     ):
         self._activity = activity
+        self._start = start
+        self._end = end
+        self._quantity = quantity
+        self._row = row
+
+
+class Stack:
+    """
+    A collection of Slices.
+    """
+
+    __slots__ = ("_start", "_end", "_slices")
+
+    def __init__(self, start: datetime, end: datetime, slices: Optional[list[Slice]]):
+        self._start = start
+        self._end = end
+        self._slices = slices
