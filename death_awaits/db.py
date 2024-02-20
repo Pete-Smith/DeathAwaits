@@ -25,7 +25,7 @@ class LogDb:
         ("activity", "activity"),
         ("start", "datetime"),
         ("end", "datetime"),
-        ("quantity", "int"),  # minutes as default
+        ("quantity", "float"),
     )
     settings_table_def = (
         ("id", "integer PRIMARY KEY"),
@@ -47,8 +47,8 @@ class LogDb:
         Open or initialize a Death Awaits Time Series Database.
 
         The following are initialization parameters and are not expected to be
-        passed when opening an existing file: units, overflow, and
-        storage_timezone.
+        passed when opening an existing file:
+        units, overflow, and storage_timezone.
         These are set once when creating a file, and can not be changed
         retroactively.
 
@@ -57,6 +57,7 @@ class LogDb:
         specified.
 
         The signaling_fixture is an intermediary object we can call Qt signals from.
+        To Cythonize the module, we need to keep it free of Qt imports.
         """
         self._signaling_fixture = signaling_fixture
         sqlite3.register_adapter(
@@ -110,10 +111,10 @@ class LogDb:
                 self.units = row[0]
                 self.overflow = row[1]
                 if (units is not None and units != self.units) or (
-                    units is not None and units != self.units
+                    overflow is not None and overflow != self.overflow
                 ):
                     raise ValueError(
-                        "Passed mismatching bounds and/or units parameters "
+                        "Passed mismatching units and/or overflow parameters "
                         "to existing database."
                     )
             except sqlite3.OperationalError as exception:
@@ -128,6 +129,8 @@ class LogDb:
             finally:
                 cursor.close()
                 self.connection.commit()
+        self.hourly_rate = LogDb.compute_hourly_rate(self.units, self.overflow)
+
 
     def signal(self, verb: str, row: int):
         """Emit a Qt signal through an intermediary class."""
@@ -140,29 +143,26 @@ class LogDb:
             else:
                 raise AttributeError()
 
-    @property
-    def bounds(self) -> float:
+    @staticmethod
+    def compute_hourly_rate(units:str, overflow:bool) -> float:
         """
-        A units-per-hour boundary for quantity clamping.
+        A units-per-hour for quantity clamping.
         Only works with certain units: seconds, minutes, hours and days.
         All other units are unbounded.
         """
-        if hasattr(self, "__bounds"):
-            return getattr(self, "__bounds")
-        if self.overflow:
-            if self.units.lower().startswith("second"):
-                self.__bounds = 60.0 * 60.0
-            elif self.units.lower().startswith("minute"):
-                self.__bounds = 60.0
-            elif self.units.lower().startswith("hour"):
-                self.__bounds = 1.0
-            elif self.units.lower().startswith("day"):
-                self.__bounds = 1.0 / 24.0
-        else:
-            self.__bounds = 0.0
-        return self.__bounds
+        if overflow:
+            if units.lower().startswith("second"):
+                return 60.0 * 60.0
+            if units.lower().startswith("minute"):
+                return 60.0
+            if units.lower().startswith("hour"):
+                return 1.0
+            if units.lower().startswith("day"):
+                return 1.0 / 24.0
+        return 0.0
 
     def _create_activitylog_table(self, cursor):
+        """ Create the Activity Log table. """
         cursor.execute("DROP INDEX IF EXISTS start_times")
         cursor.execute("DROP INDEX IF EXISTS end_times")
         cursor.execute(
@@ -174,6 +174,7 @@ class LogDb:
         cursor.execute("CREATE INDEX end_times ON activitylog (end)")
 
     def _create_settings_table(self, cursor, units, overflow, timezone):
+        """ Create the Settings table. """
         cursor.execute(
             "CREATE TABLE settings ("
             + (", ".join([f"{k} {t}" for k, t in LogDb.settings_table_def]))
@@ -184,27 +185,19 @@ class LogDb:
             (units, overflow, timezone),
         )
 
-    def _timedelta_to_quantity(self, delta: timedelta) -> int:
-        if self.units.lower().startswith("second"):
-            return int(delta.total_seconds())
-        if self.units.lower().startswith("minute"):
-            return int(round(delta.total_seconds() / 60))
-        if self.units.lower().startswith("hour"):
-            return int(round(delta.total_seconds() / 60 / 60))
-        if self.units.lower().startswith("day"):
-            return int(round(delta.total_seconds() / 60 / 60 / 24))
-        return int(delta.total_seconds() / 60)
+    def _timedelta_to_quantity(self, delta: timedelta) -> float:
+        """
+        Return the hourly_rate multiplied by the number of hours from the input parameter.
+        """
+        return (delta.total_seconds() / 60.0 / 60.0) * self.hourly_rate
 
-    def _quantity_to_timedelta(self, quantity: int) -> timedelta:
-        if self.units.lower().startswith("second"):
-            return timedelta(seconds=quantity)
-        if self.units.lower().startswith("minute"):
-            return timedelta(minutes=quantity)
-        if self.units.lower().startswith("hour"):
-            return timedelta(hours=quantity)
-        if self.units.lower().startswith("day"):
-            return timedelta(hours=quantity * 24)
-        return timedelta(minutes=quantity)
+    def _quantity_to_timedelta(self, quantity: float) -> timedelta:
+        """
+        Return the amount of time the given quantity represents at the current hourly rate.
+        """
+        if self.hourly_rate == 0.0:
+            return timedelta(seconds=0)
+        return timedelta(hours=quantity / self.hourly_rate)
 
     @staticmethod
     def regexp(expr: str, item: str) -> bool:
@@ -219,9 +212,9 @@ class LogDb:
 
     def filter(
         self,
-        activity=None,
-        start=None,
-        end=None,
+        activity:Optional[str]=None,
+        start:Optional[datetime]=None,
+        end:Optional[datetime]=None,
         first: bool = False,
         last: bool = False,
     ):
@@ -254,49 +247,48 @@ class LogDb:
             statement += "ORDER BY end DESC"
         else:
             statement += "ORDER BY start"
-        c = self.connection.cursor()
+        cursor = self.connection.cursor()
         try:
-            c.execute(statement, values)
+            cursor.execute(statement, values)
             if (first and not last) or (last and not first):
-                return c.fetchone()
-            elif first and last:
-                first = c.fetchone()
+                return cursor.fetchone()
+            if first and last:
+                first = cursor.fetchone()
                 last = self.filter(activity, start, end, False, True)
                 return first, last
-            else:
-                return c.fetchall()
+            return cursor.fetchall()
         finally:
-            c.close()
+            cursor.close()
 
     def create_entry(
         self,
-        activity,
-        start=None,
-        end=None,
-        quantity=None,
-        id=None,
+        activity:str,
+        start:Optional[datetime]=None,
+        end:Optional[datetime]=None,
+        quantity:Optional[float]=None,
+        id_:Optional[int]=None,
         apply_capitalization: bool = False,
     ):
-        """Return the id of the inserted entry."""
+        """Return the row id of the inserted entry. """
         if isinstance(quantity, timedelta):
             quantity = self._timedelta_to_quantity(quantity)
-        if id is not None:
-            self.remove_entry(id)
+        if id_ is not None:
+            self.remove_entry(id_)
         activity = self._check_activity(activity, apply_capitalization)
         start, end, quantity = self._normalize_range(start, end, quantity)
         activity, start, end, quantity = self._merge_common(
             activity, start, end, quantity
         )
         self._modify_overlaps(start, end, quantity)
-        c = self.connection.cursor()
+        cursor = self.connection.cursor()
         try:
             statement = (
                 "INSERT INTO activitylog (activity, start, end, quantity) "
                 "VALUES (?, ?, ?, ?)"
             )
             values = (activity, start, end, quantity)
-            c.execute(statement, values)
-            row_id = c.lastrowid
+            cursor.execute(statement, values)
+            row_id = cursor.lastrowid
             new_entry = {
                 "id": row_id,
                 "activity": activity,
@@ -307,9 +299,9 @@ class LogDb:
             self.record_change(new_entry, "add")
             return row_id
         finally:
-            c.close()
+            cursor.close()
             self.connection.commit()
-            self.signal("entry_added", c.lastrowid)
+            self.signal("entry_added", cursor.lastrowid)
 
     def rename_entry(self, activity, ids, apply_capitalization=False):
         if isinstance(ids, int):
@@ -387,8 +379,8 @@ class LogDb:
                 start = min(start, row["start"])
                 end = max(end, row["end"])
                 span = end - start
-                target_quantity = self.bounded_quantity(span)
-                if self.bounds > 0 and quantity + row["quantity"] > target_quantity:
+                target_quantity = self._timedelta_to_quantity(span)
+                if self.hourly_rate > 0 and quantity + row["quantity"] > target_quantity:
                     quantity = target_quantity
                 else:
                     quantity = quantity + row["quantity"]
@@ -400,11 +392,11 @@ class LogDb:
         if ids_to_delete:
             statement = "DELETE FROM activitylog WHERE "
             statement += " OR ".join(("id = ?",) * len(ids_to_delete))
-            c = self.connection.cursor()
+            cursor = self.connection.cursor()
             try:
-                c.execute(statement, ids_to_delete)
+                cursor.execute(statement, ids_to_delete)
             finally:
-                c.close()
+                cursor.close()
                 self.connection.commit()
         for id_ in ids_to_delete:
             self.signal("entry_removed", id_)
@@ -418,12 +410,12 @@ class LogDb:
                 break
         if apply_capitalization and not activity.case_sensitive_comparison(preexisting):
             pattern = r"^{0}$".format(re.escape(activity))
-            ids = list()
+            ids = []
             for row in self.filter(activity=pattern):
                 if row["activity"] != activity:
                     ids.append(row["id"])
                     self.record_change(dict(row), "modify")
-            c = self.connection.cursor()
+            cursor = self.connection.cursor()
             try:
                 statement = "UPDATE activitylog SET activity = ? WHERE "
                 statement += "OR ".join(
@@ -435,9 +427,9 @@ class LogDb:
                 variables = [
                     activity,
                 ] + ids
-                c.execute(statement, variables)
+                cursor.execute(statement, variables)
             finally:
-                c.close()
+                cursor.close()
                 self.connection.commit()
             for id_ in ids:
                 self.signal("entry_modified", id_)
@@ -455,23 +447,23 @@ class LogDb:
         If one of the time parameters (start, end, quantity) are not given,
         this method will infer it from the other two.
 
-        The databases bounds settings will be used in the following way:
+        The databases hourly_rate settings will be used in the following way:
             If all three parameters are given, the quantity will be clamped
-                to bounds parameter, if it is greater than zero.
+                to hourly_rate parameter, if it is greater than zero.
             If the start and end times are given, but not the quantity,
                 the maximum quantity for that time range will be returned,
-                or zero if bounds is also zero.
+                or zero if hourly_rate is also zero.
             If either the start or end time is given, along with a quantity,
                 the other end of the time-span will be given by using the
-                bounds as a quantity/hour measure.
-            If bounds is zero, in this instance, it simply returns an hour,
+                hourly_rate as a quantity/hour measure.
+            If hourly_rate is zero, in this instance, it simply returns an hour,
             forward or backward.
         """
         if None not in (start, end):
             if start > end:
                 raise ValueError("The end value may not be less than the start value.")
             span = end - start
-            target_quantity = self.bounded_quantity(span)
+            target_quantity = self._timedelta_to_quantity(span)
             if quantity is None or quantity > target_quantity:
                 quantity = target_quantity
         else:
@@ -487,26 +479,18 @@ class LogDb:
                 )
         return start, end, quantity
 
-    def bounded_quantity(self, span: timedelta) -> int:
-        """
-        Return a pro-rated quantity given a timedelta and the bounds setting,
-        which represents units per hour.
-        """
-        hours = span.total_seconds() / 60 / 60
-        return int(round(hours * self.bounds))
-
     def _modify_overlaps(self, start, end, quantity):
         """
         Modify the database contents so that the sum of the overlaps for any
-        range of time do not exceed the bounds.
+        range of time do not exceed the hourly_rate.
         """
-        # A bounds setting of zero means that the quantities are unbounded.
-        if self.bounds == 0:
+        # A hourly_rate setting of zero means that the quantities are unbounded.
+        if self.hourly_rate == 0:
             return None
         if isinstance(quantity, timedelta):
             quantity = self._timedelta_to_quantity(quantity)
-        overlaps = list()
-        new_rows = list()
+        overlaps = []
+        new_rows = []
         # Load the overlapping rows
         for row in self.filter(start=start, end=end):
             overlaps.append(
@@ -528,7 +512,7 @@ class LogDb:
                 previous = time
                 continue
             # Calculate the maximum allowable in the time slice.
-            slice_max = self.bounded_quantity(time - previous)
+            slice_max = self._timedelta_to_quantity(time - previous)
             candidate_contrib = self.slice_contrib(
                 {"start": start, "end": end, "quantity": quantity}, previous, time
             )
@@ -820,32 +804,32 @@ class LogDb:
         removed_entry = self.row(id_)
         if removed_entry:
             self.record_change(dict(removed_entry), "remove")
-        c = self.connection.cursor()
+        cursor = self.connection.cursor()
         try:
-            c.execute(
+            cursor.execute(
                 "DELETE FROM activitylog WHERE id=?",
                 [
                     id_,
                 ],
             )
         finally:
-            c.close()
+            cursor.close()
             self.connection.commit()
         self.signal("entry_removed", id_)
 
     def row(self, id_):
         """Singleton row look-up by id."""
-        c = self.connection.cursor()
+        cursor = self.connection.cursor()
         try:
-            c.execute(
+            cursor.execute(
                 "SELECT * FROM activitylog WHERE id=?",
                 [
                     id_,
                 ],
             )
-            return c.fetchone()
+            return cursor.fetchone()
         finally:
-            c.close()
+            cursor.close()
 
     def activities(self):
         cursor = self.connection.cursor()
@@ -921,9 +905,9 @@ class LogDb:
             return LogDb._seconds_from_strings(days, hours, minutes)
         style_b = [style_b_days, style_b_hours, style_b_minutes]
         for i, finder in enumerate(style_b):
-            m = finder.search(raw)
-            if m and m.groups()[0]:
-                style_b[i] = m.groups()[0]
+            match = finder.search(raw)
+            if match and match.groups()[0]:
+                style_b[i] = match.groups()[0]
             else:
                 style_b[i] = None
         if style_b != (None, None, None):
@@ -945,7 +929,7 @@ class LogDb:
             )
             quantity = row["quantity"]
             if quantity is None:
-                quantity = self.bounded_quantity(row["end"] - row["start"])
+                quantity = self._timedelta_to_quantity(row["end"] - row["start"])
             return int(round(quantity * proportion))
         else:
             return 0

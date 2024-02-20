@@ -40,16 +40,15 @@ def _resolve_timezone(timezone: Optional[str] = None, default_utc: bool = True):
         return tz.tzlocal()
     return tz.gettz(timezone)
 
-# TODO: Would storing the datetime objects as integer timestamps be better for indexing?
 
 def datetime_adapter_factory(
     ui_timezone: Optional[str] = None, storage_timezone: Optional[str] = None
-) -> Callable[[datetime], bytes]:
+) -> Callable[[datetime], int]:
     """
     SQLite database adapter factory for datetime objects.
 
     The returned function will transform Python datetime objects
-    into byte strings for storage.
+    into timestamp integers for storage.
     During this transformation, the function handles the timezone conversion
     from the UI timezone to the storage timezone.
     It will also round microseconds to the nearest second,
@@ -61,7 +60,7 @@ def datetime_adapter_factory(
     ui_tz = _resolve_timezone(ui_timezone, False)
     storage_tz = _resolve_timezone(storage_timezone, True)
 
-    def _adapter(value: datetime) -> bytes:
+    def _adapter(value: datetime) -> int:
         if value.tzinfo is None:
             value = value.replace(tzinfo=ui_tz)
         if value.microsecond != 0:
@@ -71,7 +70,8 @@ def datetime_adapter_factory(
             value = value.replace(microsecond=0)
         value = value.astimezone(storage_tz)
         return (
-            tz.resolve_imaginary(value).replace(tzinfo=None).isoformat().encode("ascii")
+            # tz.resolve_imaginary(value).replace(tzinfo=None).isoformat().encode("ascii")
+            int(tz.resolve_imaginary(value).replace(tzinfo=None).timestamp())
         )
 
     return _adapter
@@ -79,7 +79,7 @@ def datetime_adapter_factory(
 
 def datetime_converter_factory(
     ui_timezone: Optional[str] = None, storage_timezone: Optional[str] = None
-) -> Callable[[bytes], datetime]:
+) -> Callable[[int], datetime]:
     """
     SQLite database converter factory for datetime objects.
 
@@ -96,15 +96,13 @@ def datetime_converter_factory(
     ui_tz = _resolve_timezone(ui_timezone, False)
     storage_tz = _resolve_timezone(storage_timezone, True)
 
-    def _converter(value: bytes) -> datetime:
-        retval = datetime.fromisoformat(value.decode("ascii")).replace(
-            tzinfo=storage_tz
-        )
+    def _converter(value: int) -> datetime:
+        retval = datetime.fromtimestamp(float(value), tz=storage_tz)
         if retval.microsecond != 0:
-            retval = retval.replace(
-                second=retval.second + round(retval.microsecond / 1_000_000),
-                microsecond=0,
-            )
+            second_to_add = int(round(retval.microsecond / 1_000_000))
+            if second_to_add:
+                retval += timedelta(seconds=1)
+            retval = retval.replace(microsecond=0)
         retval = retval.astimezone(ui_tz)
         return tz.resolve_imaginary(retval)
 
@@ -112,6 +110,7 @@ def datetime_converter_factory(
 
 
 class TimeStep(Enum):
+    """ Calculate time boundaries. """
     SECOND = 0
     MINUTE = 1
     TEN_MINUTES = 2
@@ -140,7 +139,10 @@ class TimeStep(Enum):
 
 
 class Activity:
-    """Hierarchical text associated with each log entry. Comparisons are case insensitive."""
+    """
+    Hierarchical text associated with each log entry.
+    Comparisons are case insensitive by default. 
+    """
 
     delimiter = re.compile(r"(?<!:):{1}(?!:)")
     __slots__ = ("_contents", "_cursor")
